@@ -1,0 +1,68 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+textarea:focus { 
+  outline: none !important;
+}
+
+.react-swipeable-view-container {
+  height: 100%;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes backgroundAnimation {
+  from {background-color: transparent;}
+  to {background-color: #FF3693;}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.code-editor, .CodeMirror, textarea {
+  
+  font-family:  'Fira Code', monospace !important;
+ 
+  /* line-height: 152%;
+  font-variant-ligatures: contextual;
+  font-feature-settings: "calt";*/
+  font-size: 18px;
+}
+
+select:focus {outline:0;}
