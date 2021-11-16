@@ -1,9 +1,16 @@
 import Task from 'task.js';
 import { builtinFiles } from './SkulptStdlib';
 
+
+export interface Variable {
+    name: string;
+    value: any;
+}
+
 export interface EvalResult {
     error?: string;
     output: string;
+    variables: Variable[]
 }
 
 declare var Sk: any;
@@ -110,16 +117,25 @@ export const pyEval = (
         },
       });
 
-      try {
-        Sk.importMainWithBody('<stdin>', false, code);
+      let keys = Object.keys(Sk.global);
+      let variables: Variable[] = [];
 
-        for (let global in Sk.globals) {
-            console.log(global, Sk.ffi.remapToJs(Sk.globals[global]))
+      try {
+        
+        Sk.importMainWithBody('<stdin>', false, code);
+        for (let key in Sk.global) {
+            if (keys.indexOf(key) == -1) {
+                variables.push({
+                    name: key,
+                    value: Sk.ffi.remapToJs(Sk.global[key])
+                })
+            }
         }
       } catch (e) {
         return {
           output: stdOut,
           error: e.toString(),
+          variables: variables
         };
       }
       return {

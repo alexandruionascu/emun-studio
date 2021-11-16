@@ -12,6 +12,7 @@ import VariableBox from './VariableBox';
 import Pagination from './components/Pagination';
 import { runCode, setEngine, setOptions, loadEngines } from 'client-side-python-runner';
 import Task from 'task.js';
+import Memomji from './memoji.png';
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/seti.css');
 require('codemirror/mode/python/python');
@@ -75,7 +76,7 @@ function App() {
   const [stdin, setStdin] = React.useState<string>('');
   const [stdout, setStdout] = React.useState<string>('');
   const [enginesLoaded, setEnginesLoaded] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>(); 
+  const [error, setError] = React.useState<string>();
 
 
 
@@ -105,25 +106,25 @@ function App() {
 
 
   return (
-    <div style={{ backgroundColor: '#F6F1FF', width: '100vw', height: '100vh' }}>
+    <div style={{ backgroundColor: '#F6F1FF', width: '100%', height: '100%' }}>
+      <header style={{padding: '10px 0px 10px 0px', backgroundColor: 'white', width: '100%', borderRadius: '0 0 10px 10px', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{backgroundColor: '#FF3693', marginLeft: 50, borderRadius: 20, color: 'white', padding: 10, fontSize: 14, fontWeight: 700, fontFamily: 'Muller'}}>P1 Lab Playground</span>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: 50}}>
+          <span style={{fontFamily: 'Muller', fontWeight: 700, color: '#FF3693'}}>Alex Ionașcu</span>
+          <img src={Memomji} height={50}  />
+        </div>
+      </header>
+
+      <h1 style={{fontSize: 20, left: 50, fontWeight: 900, color: '#FF3693' }}>1.1. Programming 1 in Python</h1>
 
       <div style={{ display: 'flex', width: '100%', height: '100%' }}>
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-          <header style={{ width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap',marginTop: 20, marginLeft: 20, marginRight: 20 }}>
-            <h1 style={{ position: 'relative', fontSize: 20, left: 50, fontWeight: 900, color: '#FF3693' }}>1.1. Programming 1 in Python</h1>
-            <h2 style={{ position: 'relative', fontSize: 14, right: 50, fontWeight: 900, color: '#FF3693' }}>20:49 mins remaining</h2>
-          </header>
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
           <div style={{
             backgroundColor: '#FFFFFF',
-            paddingLeft: 30,
-            paddingTop: 25,
-            paddingBottom: 10,
-            borderRadius: 15,
-            marginTop: 5,
-            width: '90%',
-            flex: 8,
+            width: 200,
+            padding: 5,
             boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-            marginBottom: '10vh',
             position: 'relative'
           }}>
             <WindowButtons />
@@ -157,10 +158,9 @@ function App() {
         </div>
         <div style={{
           width: 450,
-          height: '100%',
+          height: 500,
           overflow: 'scroll',
           position: 'relative',
-          float: 'right',
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'center',
@@ -169,25 +169,31 @@ function App() {
           boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
           flexDirection: 'column'
         }}>
-          {/*
-            latestVariableValues.map((vv, i) => <VariableBox variableName={vv.name} colorOrder={i} key={i} variableValue={vv.value} />)
-          */}
-          <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
-            <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Input</h2>
-            <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
-              value={stdin}
-              onChange={(e) => setStdin(e.target.value)}
-            />
+          <SwipeableViews index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)}>
+            <div>
+              <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
+                <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Input</h2>
+                <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
+                  value={stdin}
+                  onChange={(e) => setStdin(e.target.value)}
+                />
 
-          </div>
+              </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
-            <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Output</h2>
-            <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
-              value={stdout}
-            />
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
+                <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Output</h2>
+                <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
+                  value={stdout}
+                />
+              </div>
+            </div>
+            <div>
+              <h2>Hey</h2>
+            </div>
+          </SwipeableViews>
+          <Pagination dots={2} index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)} />
         </div>
+
       </div>
 
 
