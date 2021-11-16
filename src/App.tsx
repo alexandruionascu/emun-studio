@@ -106,24 +106,25 @@ function App() {
 
 
   return (
-    <div style={{ backgroundColor: '#F6F1FF', width: '100%', height: '100%' }}>
-      <header style={{padding: '10px 0px 10px 0px', backgroundColor: 'white', width: '100%', borderRadius: '0 0 10px 10px', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{backgroundColor: '#FF3693', marginLeft: 50, borderRadius: 20, color: 'white', padding: 10, fontSize: 14, fontWeight: 700, fontFamily: 'Muller'}}>P1 Lab Playground</span>
+    <div style={{  width: '100%', height: '100%' }}>
+      <header style={{padding: '4px 0px 4px 0px', backgroundColor: 'white', width: '100%', borderRadius: '0 0 10px 10px', boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{backgroundColor: '#FF3693', marginLeft: 50, borderRadius: 20, color: 'white', padding: 10, fontSize: 10, fontWeight: 700, fontFamily: 'Muller'}}>P1 Lab Playground</span>
         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: 50}}>
-          <span style={{fontFamily: 'Muller', fontWeight: 700, color: '#FF3693'}}>Alex Ionașcu</span>
+          <span style={{fontFamily: 'Muller', fontWeight: 700, color: '#FF3693', fontSize: 16}}>Alex Ionașcu</span>
           <img src={Memomji} height={50}  />
         </div>
       </header>
 
-      <h1 style={{fontSize: 20, left: 50, fontWeight: 900, color: '#FF3693' }}>1.1. Programming 1 in Python</h1>
-
-      <div style={{ display: 'flex', width: '100%', height: '100%' }}>
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 25,  flexDirection: 'row', width: '100%', height: '100%', padding: 15, flexWrap: 'wrap' }}>
           <div style={{
             backgroundColor: '#FFFFFF',
-            width: 200,
-            padding: 5,
+            flex: 2,
+            height: 500,
+            minWidth: 500,
+            padding: 15,
+            resize: 'horizontal',
+
+            borderRadius: 20,
             boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
             position: 'relative'
           }}>
@@ -155,10 +156,12 @@ function App() {
             }
           </div>
 
-        </div>
+        
         <div style={{
-          width: 450,
+          flex: 1,
           height: 500,
+          padding: 15,
+          minWidth: 500,
           overflow: 'scroll',
           position: 'relative',
           display: 'flex',
