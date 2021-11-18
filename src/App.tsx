@@ -1,7 +1,4 @@
 import React from 'react';
-import { ReactMediaRecorder } from "react-media-recorder";
-import Editor from '@monaco-editor/react';
-import ControlledEditor from "@monaco-editor/react";
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import './App.css';
 import { EvalResult, pyEval, Variable } from './eval/PyEval';
@@ -10,8 +7,6 @@ import { Animated } from 'react-animated-css';
 import SwipeableViews from 'react-swipeable-views';
 import VariableBox from './VariableBox';
 import Pagination from './components/Pagination';
-import { runCode, setEngine, setOptions, loadEngines } from 'client-side-python-runner';
-import Task from 'task.js';
 import Memomji from './memoji.png';
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/seti.css');
@@ -78,14 +73,25 @@ function App() {
   const [enginesLoaded, setEnginesLoaded] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>();
   const [variables, setVariables] = React.useState<Variable[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
 
 
   React.useEffect(() => {
     pyEval(code + '\n', stdin).then((res: EvalResult) => {
+
+      if (variables.length > 0 && res?.error) {
+        setIsLoading(true);
+      } else {
+        setIsLoading(false);
+      }
+
       setStdout(res.output);
       setError(res?.error);
-      setVariables(res?.variables ?? []);
+      if (!res?.error) {
+        setVariables(res?.variables ?? []);
+      }
+      
 
 
       console.log(res?.variables)
@@ -104,10 +110,6 @@ function App() {
   }, [code])
 
   const [index, setIndex] = React.useState(0);
-
-  loadEngines(["pyodide", "skulpt", "brython"]).then(() => {
-    setEnginesLoaded(true);
-  })
 
 
   return (
@@ -191,9 +193,9 @@ function App() {
                 />
               </div>
             </div>
-            <div>
+            <div style={{display: 'flex', justifyContent: 'center', gap: 15, padding: 30}}>
               {
-                variables.map((v, i) => <VariableBox colorOrder={i} variableName={v.name} variableValue={v.value} key={i} />)
+                variables.map((v, i) => <VariableBox loading={isLoading} colorOrder={i} variableName={v.name} variableValue={v.value} key={i} />)
               }
             </div>
           </SwipeableViews>

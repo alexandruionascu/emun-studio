@@ -1,5 +1,12 @@
 import * as React from 'react';
 import { Animated } from 'react-animated-css';
+import ClipLoader from "react-spinners/ClipLoader";
+import { css } from "@emotion/react";
+
+const override = css`
+  position: absolute;
+  background: white;
+`;
 
 interface Props {
     variableName: string;
@@ -7,6 +14,7 @@ interface Props {
     variableValue: number | string | boolean | null | undefined;
     indexLabel?: number | string;
     isCurrentIdentifier?: boolean;
+    loading: boolean;
 }
 
 interface State {
@@ -81,29 +89,35 @@ class VariableBox extends React.Component<Props, State> {
                             color: '#948E96',
                             borderImageSlice: 1,
                             textAlign: 'center',
+                            filter: this.props.loading ? 'blur(1px)': 'unset',
+                            position: 'relative',
                             fontWeight: 700,
-                            boxShadow: "1px 3px 6px -1px #AAAAAA",
+                            fontFamily: 'Muller',
+                            boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
                             background: VariableBox.backgrounds[
                                 this.props.colorOrder % VariableBox.backgrounds.length
                             ]
                         }}
                     >
-                        {`${this.props.variableValue}`}
+                       {this.props.loading && <ClipLoader color={'#948E96'} loading={true} css={override} size={30} /> }
+                       {`${this.props.variableValue}`}
                     </div>
                 </Animated>
                 <div
                     style={{
-                        fontFamily: "'Fira Code', monospace !important",
+                        fontFamily: 'Muller',
                         fontWeight: 300 /* this.props.isCurrentIdentifier ? 'bold' : 'normal' */,
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        marginTop: 10
                     }}
                 >
                     <span
                         className="box-label btn p-1 shadow-sm"
                         style={{
                             color: '#948E96',
-                            fontWeight: 700,
-                            fontFamily: "'Fira Code', monospace !important;",
+                            fontWeight: 500,
+                            marginTop: 10,
+                            fontFamily: 'Muller',
                             textAlign: 'center'
                         }}
                     >
