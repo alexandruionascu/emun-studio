@@ -3,14 +3,14 @@ import { builtinFiles } from './SkulptStdlib';
 
 
 export interface Variable {
-    name: string;
-    value: any;
+  name: string;
+  value: any;
 }
 
 export interface EvalResult {
-    error?: string;
-    output: string;
-    variables: Variable[]
+  error?: string;
+  output: string;
+  variables: Variable[]
 }
 
 declare var Sk: any;
@@ -26,7 +26,7 @@ export const pyEval = (
   let task = new Task({
     requires: {
       // for testing in jest
-      Sk: !process.browser ? 'skulpt' : 'https://cdn.rawgit.com/skulpt/skulpt-dist/0.11.0/skulpt.min.js' ,
+      Sk: !process.browser ? 'skulpt' : 'https://cdn.rawgit.com/skulpt/skulpt-dist/0.11.0/skulpt.min.js',
     },
     globals: {
       skulptBuiltinFiles: builtinFiles,
@@ -95,6 +95,7 @@ export const pyEval = (
       }
 
       Sk.builtin.input = nextString;
+      Sk.builtins.input = Sk.builtin.input;
 
       Sk.builtin.nextInt = nextInt;
       Sk.builtins.nextInt = Sk.builtin.nextInt;
@@ -112,34 +113,39 @@ export const pyEval = (
 
       Sk.configure({
         read: readModule,
-        output: function(output: string) {
+        output: function (output: string) {
           stdOut += output;
         },
       });
 
-      let keys = Object.keys(Sk.global);
       let variables: Variable[] = [];
 
       try {
-        
+        const excludedKeys = ['__doc__', '__file__', '__name__', '__path__'];
         Sk.importMainWithBody('<stdin>', false, code);
-        for (let key in Sk.global) {
-            if (keys.indexOf(key) == -1) {
-                variables.push({
-                    name: key,
-                    value: Sk.ffi.remapToJs(Sk.global[key])
-                })
+
+        if (Sk.globals) {
+          console.log(Sk.globals)
+          for (let key in Sk.globals) {
+            if (excludedKeys.indexOf(key) === -1) {
+       
+              variables.push({
+                name: key,
+                value: Sk.builtins.str(Sk.globals[key]).v
+              })
             }
+          }
         }
+
       } catch (e) {
         return {
           output: stdOut,
-          error: e.toString(),
-          variables: variables
+          error: e.toString()
         };
       }
       return {
         output: stdOut,
+        variables: variables
       };
     },
     code,

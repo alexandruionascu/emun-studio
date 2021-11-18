@@ -4,7 +4,7 @@ import Editor from '@monaco-editor/react';
 import ControlledEditor from "@monaco-editor/react";
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import './App.css';
-import { EvalResult, pyEval } from './eval/PyEval';
+import { EvalResult, pyEval, Variable } from './eval/PyEval';
 import Webcam from "react-webcam";
 import { Animated } from 'react-animated-css';
 import SwipeableViews from 'react-swipeable-views';
@@ -77,13 +77,18 @@ function App() {
   const [stdout, setStdout] = React.useState<string>('');
   const [enginesLoaded, setEnginesLoaded] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>();
+  const [variables, setVariables] = React.useState<Variable[]>([]);
 
 
 
   React.useEffect(() => {
-    pyEval(code, stdin).then((res: EvalResult) => {
+    pyEval(code + '\n', stdin).then((res: EvalResult) => {
       setStdout(res.output);
-      setError(res?.error)
+      setError(res?.error);
+      setVariables(res?.variables ?? []);
+
+
+      console.log(res?.variables)
     });
 
     /*console.log(injectPyCode(code, startSeparator, endSeparator));
@@ -130,7 +135,6 @@ function App() {
           }}>
             <WindowButtons />
 
-            <SwipeableViews index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)}>
               <CodeMirror
                 className="code-editor"
                 value={code}
@@ -143,10 +147,7 @@ function App() {
                 }}
               />
 
-              <div>
-                <h1>hello</h1>
-              </div>
-            </SwipeableViews>
+        
 
             <Pagination dots={3} index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)} />
             {error &&
@@ -172,11 +173,11 @@ function App() {
           boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
           flexDirection: 'column'
         }}>
-          <SwipeableViews index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)}>
-            <div>
-              <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
+          <SwipeableViews index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)} style={{height: '100%'}}>
+            <div style={{display: 'flex', height: '100%', flexDirection: 'column'}}>
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
                 <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Input</h2>
-                <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
+                <textarea style={{fontSize: 10, flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
                   value={stdin}
                   onChange={(e) => setStdin(e.target.value)}
                 />
@@ -185,13 +186,15 @@ function App() {
 
               <div style={{ display: 'flex', flexDirection: 'column', background: '#FCFCFF', flex: 1, padding: 10, margin: 35, borderRadius: 20, boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px' }}>
                 <h2 style={{ color: '#FF3693', marginLeft: 20 }}>Output</h2>
-                <textarea style={{ flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
+                <textarea style={{fontSize: 10, flex: '1 1', border: 'none', background: 'transparent', resize: 'none' }}
                   value={stdout}
                 />
               </div>
             </div>
             <div>
-              <h2>Hey</h2>
+              {
+                variables.map((v, i) => <VariableBox colorOrder={i} variableName={v.name} variableValue={v.value} key={i} />)
+              }
             </div>
           </SwipeableViews>
           <Pagination dots={2} index={index} onChangeIndex={(newIndex: number) => setIndex(newIndex)} />
