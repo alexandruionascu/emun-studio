@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Link, Route } from "wouter";
+import Playground from './Playground';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+      <Route path="/playground">
+        {() => <Playground isWorkspace={true} />}
+      </Route>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -1,65 +1,61 @@
-import * as React from 'react';
-import { Animated } from 'react-animated-css';
-import ClipLoader from "react-spinners/ClipLoader";
-import { css } from "@emotion/react";
+import * as React from 'react'
+import { Animated } from 'react-animated-css'
+import ClipLoader from 'react-spinners/ClipLoader'
+import { css } from '@emotion/react'
 
 const override = css`
-  position: absolute;
-  background: white;
-`;
+    position: absolute;
+    background: white;
+`
 
 interface Props {
-    variableName: string;
-    colorOrder: number;
-    variableValue: number | string | boolean | null | undefined;
-    indexLabel?: number | string;
-    isCurrentIdentifier?: boolean;
-    loading: boolean;
+    variableName: string
+    colorOrder: number
+    variableValue: number | string | boolean | null | undefined
+    indexLabel?: number | string
+    isCurrentIdentifier?: boolean
+    loading: boolean
 }
 
 interface State {
-    isComponentVisible: boolean;
-    isBoxVisible: boolean;
+    isComponentVisible: boolean
+    isBoxVisible: boolean
 }
 
 class VariableBox extends React.Component<Props, State> {
     static defaultProps = {
-        isCurrentIdentifier: false
-    };
-    static backgrounds = [
-        '#F3F2F9',
-        '#F3F2F9',
-        '#F3F2F9'
-    ];
+        isCurrentIdentifier: false,
+    }
+    static backgrounds = ['#F3F2F9', '#F3F2F9', '#F3F2F9']
 
     constructor(props: Props) {
-        super(props);
+        super(props)
 
         this.state = {
             isComponentVisible: true,
-            isBoxVisible: true
-        };
+            isBoxVisible: true,
+        }
     }
     triggetOutAnimation() {
         this.setState({
-            isComponentVisible: false
-        });
+            isComponentVisible: false,
+        })
     }
 
     toggleAnimation() {
         this.setState({
-            isBoxVisible: !this.state.isBoxVisible
-        });
+            isBoxVisible: !this.state.isBoxVisible,
+        })
     }
 
     componentWillReceiveProps(nextProps: Props) {
         if (this.props.variableValue !== nextProps.variableValue) {
-            this.toggleAnimation();
+            this.toggleAnimation()
         }
     }
 
     componentWillUnmount() {
-        setTimeout(() => this.triggetOutAnimation(), 500);
+        setTimeout(() => this.triggetOutAnimation(), 500)
     }
 
     render() {
@@ -89,18 +85,30 @@ class VariableBox extends React.Component<Props, State> {
                             color: '#948E96',
                             borderImageSlice: 1,
                             textAlign: 'center',
-                            filter: this.props.loading ? 'blur(1px)': 'unset',
+                            boxSizing: 'content-box',
+                            filter: this.props.loading ? 'blur(1px)' : 'unset',
                             position: 'relative',
                             fontWeight: 700,
                             fontFamily: 'Muller',
+                            lineHeight: 1.5,
+                            overflowY: 'auto',
                             boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-                            background: VariableBox.backgrounds[
-                                this.props.colorOrder % VariableBox.backgrounds.length
-                            ]
+                            background:
+                                VariableBox.backgrounds[
+                                    this.props.colorOrder %
+                                        VariableBox.backgrounds.length
+                                ],
                         }}
                     >
-                       {this.props.loading && <ClipLoader color={'#948E96'} loading={true} css={override} size={30} /> }
-                       {`${this.props.variableValue}`}
+                        {this.props.loading && (
+                            <ClipLoader
+                                color={'#948E96'}
+                                loading={true}
+                                css={override}
+                                size={30}
+                            />
+                        )}
+                        {`${this.props.variableValue}`}
                     </div>
                 </Animated>
                 <div
@@ -108,7 +116,7 @@ class VariableBox extends React.Component<Props, State> {
                         fontFamily: 'Muller',
                         fontWeight: 300 /* this.props.isCurrentIdentifier ? 'bold' : 'normal' */,
                         textAlign: 'center',
-                        marginTop: 10
+                        marginTop: 10,
                     }}
                 >
                     <span
@@ -118,15 +126,16 @@ class VariableBox extends React.Component<Props, State> {
                             fontWeight: 500,
                             marginTop: 10,
                             fontFamily: 'Muller',
-                            textAlign: 'center'
+                            textAlign: 'center',
                         }}
                     >
-                        {this.props.variableName}<sub>{this.props.indexLabel}</sub>
+                        {this.props.variableName}
+                        <sub>{this.props.indexLabel}</sub>
                     </span>
                 </div>
             </Animated>
-        );
+        )
     }
 }
 
-export default VariableBox;
+export default VariableBox

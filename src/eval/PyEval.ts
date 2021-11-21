@@ -94,6 +94,13 @@ export const pyEval = (
         }
       }
 
+      function runCode(code: string) {
+        Sk.importMainWithBody('<stdin>', false, code);
+      }
+
+      Sk.builtin.runCode = runCode;
+      Sk.builtins.runCode = Sk.builtin.runCode;
+
       Sk.builtin.input = nextString;
       Sk.builtins.input = Sk.builtin.input;
 
@@ -109,12 +116,17 @@ export const pyEval = (
       Sk.builtin.nextChar = nextChar;
       Sk.builtins.nextChar = Sk.builtin.nextChar;
 
-      let stdOut = '';
+      var stdOut = '';
+
+      Sk.builtin.__stdout__ = stdOut;
+      Sk.builtins.__stdout__ = Sk.builtin.__stdout__;
 
       Sk.configure({
         read: readModule,
         output: function (output: string) {
           stdOut += output;
+          Sk.builtin.__stdout__ = stdOut;
+          Sk.builtins.__stdout__ = Sk.builtin.__stdout__;
         },
       });
 
@@ -125,7 +137,6 @@ export const pyEval = (
         Sk.importMainWithBody('<stdin>', false, code);
 
         if (Sk.globals) {
-          console.log(Sk.globals)
           for (let key in Sk.globals) {
             if (excludedKeys.indexOf(key) === -1) {
        

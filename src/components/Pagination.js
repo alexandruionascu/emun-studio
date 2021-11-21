@@ -6,9 +6,10 @@ const styles = {
   root: {
     position: 'absolute',
     bottom: 8,
-    left: 8,
+    justifyContent: 'center',
     display: 'flex',
     flexDirection: 'row',
+    width: '100%'
   },
 };
 
