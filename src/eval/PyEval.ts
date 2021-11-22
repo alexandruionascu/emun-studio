@@ -30,6 +30,7 @@ export const pyEval = (
     },
     globals: {
       skulptBuiltinFiles: builtinFiles,
+      inputStdinLineNumber: 0,
       inputStdinDataToProcessCursor: 0,
       inputStdinDataToProcess: consoleInput,
     },
@@ -49,6 +50,7 @@ export const pyEval = (
             'https://raw.githubusercontent.com/waywaaard/skulpt_numpy/master/numpy/random/__init__.js',
         },
       };
+      let inputStdinLineNumber = 0;
       let inputStdinDataToProcessCursor = 0;
       let inputStdinDataToProcess = consoleInput;
       function nextInt() {
@@ -57,6 +59,12 @@ export const pyEval = (
 
       function nextFloat() {
         return parseFloat(nextString());
+      }
+
+      function input() {
+        let lineStr = inputStdinDataToProcess.split('\n')[inputStdinLineNumber];
+        inputStdinLineNumber++;
+        return Sk.ffi.remapToPy(lineStr);
       }
 
       function nextString() {
@@ -69,7 +77,7 @@ export const pyEval = (
           next_string += inputStdinDataToProcess[inputStdinDataToProcessCursor];
           inputStdinDataToProcessCursor += 1;
         }
-        return next_string;
+        return Sk.ffi.remapToPy(next_string);
       }
 
       function nextChar() {
@@ -101,7 +109,7 @@ export const pyEval = (
       Sk.builtin.runCode = runCode;
       Sk.builtins.runCode = Sk.builtin.runCode;
 
-      Sk.builtin.input = nextString;
+      Sk.builtin.input = input;
       Sk.builtins.input = Sk.builtin.input;
 
       Sk.builtin.nextInt = nextInt;

@@ -7,8 +7,12 @@ import Playground from './Playground';
 
 ReactDOM.render(
   <React.StrictMode>
-      <Route path="/playground">
-        {() => <Playground isWorkspace={true} />}
+      <Route path="/editor">
+        {() => <Playground mode="editor" />}
+      </Route>
+
+      <Route path="/">
+        {() => <Playground mode="workspace" />}
       </Route>
   </React.StrictMode>,
   document.getElementById('root')

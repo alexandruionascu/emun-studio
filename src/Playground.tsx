@@ -10,6 +10,7 @@ import Pagination from './components/Pagination'
 import YAML from 'yaml'
 import Memomji from './memoji.png'
 import { exception } from 'console'
+import { textChangeRangeIsUnchanged } from 'typescript'
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/seti.css')
 require('codemirror/mode/python/python')
@@ -35,35 +36,13 @@ const WindowButtons = () => (
     </div>
 )
 
-/*const VariableBox = (props: { name: string, value: string }) => (
-  <Animated
-    animationIn="flipInX"
-    animationOut="flipInY"
-    animateOnMount={true}
-    isVisible={true}
-  >
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-      <span style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignContent: 'center',
-        backgroundColor: '#2CE4C8',
-        width: 20,
-        height: 20,
-        padding: 10,
-        borderRadius: 5,
-        fontFamily: 'Jost'
-      }}>{props.value}</span>
-      <span style={{ fontFamily: 'Jost', color: 'white' }}>{props.name}</span>
-    </div>
-  </Animated>
-)*/
-
 const startSeparator = Math.random().toString(36).substring(7)
 const endSeparator = Math.random().toString(36).substring(7)
 
+type Mode = 'user' | 'editor' | 'workspace'
+
 interface PlaygroundProps {
-    isWorkspace: boolean
+    mode: Mode
 }
 
 interface TestResult {
@@ -86,11 +65,9 @@ const initialCode = `# here goes your Python code`
 const initialTestngCode = `# here goes your testing code`
 
 function Playground(props: PlaygroundProps) {
-    const editorRef = React.useRef()
     const [code, setCode] = React.useState<string>(initialCode)
     const [stdin, setStdin] = React.useState<string>('')
     const [stdout, setStdout] = React.useState<string>('')
-    const [enginesLoaded, setEnginesLoaded] = React.useState<boolean>(false)
     const [error, setError] = React.useState<string>()
     const [variables, setVariables] = React.useState<Variable[]>([])
     const [isLoading, setIsLoading] = React.useState(false)
@@ -139,7 +116,7 @@ function Playground(props: PlaygroundProps) {
                         ...testResults,
                         [testName]: {
                             name: testName,
-                            output: testRes.output,
+                            output: testRes?.error ?? '',
                             passed: testRes?.error ? false : true,
                         },
                     })
@@ -198,7 +175,7 @@ function Playground(props: PlaygroundProps) {
                             fontSize: 16,
                         }}
                     >
-                        Alex Ionașcu
+                        by Alex Ionașcu
                     </span>
                     <img src={Memomji} height={50} />
                 </div>
@@ -250,39 +227,42 @@ function Playground(props: PlaygroundProps) {
                                 setCode(value)
                             }}
                         />
-
-                        <CodeMirror
-                            className="code-editor"
-                            value={testingCode}
-                            options={{
-                                mode: 'python',
-                                theme: 'default',
-                            }}
-                            onBeforeChange={(editor, data, value) => {
-                                setTestingCode(value)
-                            }}
-                        />
-
-                        <CodeMirror
-                            className="code-editor"
-                            value={testingInput}
-                            options={{
-                                mode: 'text/x-yaml',
-                                theme: 'default',
-                            }}
-                            onBeforeChange={(editor, data, value) => {
-                                setTestingInput(value)
-                            }}
-                        />
+                        {props.mode == 'editor' && (
+                            <CodeMirror
+                                className="code-editor"
+                                value={testingCode}
+                                options={{
+                                    mode: 'python',
+                                    theme: 'default',
+                                }}
+                                onBeforeChange={(editor, data, value) => {
+                                    setTestingCode(value)
+                                }}
+                            />
+                        )}
+                        {props.mode == 'editor' && (
+                            <CodeMirror
+                                className="code-editor"
+                                value={testingInput}
+                                options={{
+                                    mode: 'text/x-yaml',
+                                    theme: 'default',
+                                }}
+                                onBeforeChange={(editor, data, value) => {
+                                    setTestingInput(value)
+                                }}
+                            />
+                        )}
                     </SwipeableViews>
-
-                    <Pagination
-                        dots={3}
-                        index={codeEditorIdx}
-                        onChangeIndex={(newIndex: number) =>
-                            setCodeEditorIdx(newIndex)
-                        }
-                    />
+                    {props.mode == 'editor' && (
+                        <Pagination
+                            dots={3}
+                            index={codeEditorIdx}
+                            onChangeIndex={(newIndex: number) =>
+                                setCodeEditorIdx(newIndex)
+                            }
+                        />
+                    )}
 
                     {error && (
                         <div
@@ -427,34 +407,35 @@ function Playground(props: PlaygroundProps) {
                         }
                     />
                 </div>
-
-                <div
-                    style={{
-                        backgroundColor: '#FFFFFF',
-                        flex: 2,
-                        height: 500,
-                        minWidth: 500,
-                        padding: 40,
-                        resize: 'horizontal',
-                        marginBottom: 50,
-                        borderRadius: 20,
-                        boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-                        position: 'relative',
-                    }}
-                >
-                    <span
+                {props.mode == 'editor' && (
+                    <div
                         style={{
-                            fontFamily: 'Muller',
-                            fontWeight: 700,
-                            color: '#FF3693',
-                            fontSize: 26,
+                            backgroundColor: '#FFFFFF',
+                            flex: 2,
+                            height: 500,
+                            minWidth: 500,
+                            padding: 40,
+                            resize: 'horizontal',
+                            marginBottom: 50,
+                            borderRadius: 20,
+                            boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+                            position: 'relative',
                         }}
                     >
-                        Testing
-                    </span>
+                        <span
+                            style={{
+                                fontFamily: 'Muller',
+                                fontWeight: 700,
+                                color: '#FF3693',
+                                fontSize: 26,
+                            }}
+                        >
+                            Testing
+                        </span>
 
-                    {JSON.stringify(testResults)}
-                </div>
+                        {JSON.stringify(testResults)}
+                    </div>
+                )}
             </div>
 
             {/*<header className="App-header">
