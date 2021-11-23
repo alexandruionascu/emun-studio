@@ -1,7 +1,7 @@
 import React from 'react'
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import './Playground.css'
-import { EvalResult, pyEval, Variable } from './eval/PyEval'
+import { EvalResult, injectPyCode, pyEval, Variable } from './eval/PyEval'
 import Webcam from 'react-webcam'
 import { Animated } from 'react-animated-css'
 import SwipeableViews from 'react-swipeable-views'
@@ -81,7 +81,12 @@ function Playground(props: PlaygroundProps) {
     }>({})
 
     React.useEffect(() => {
-        pyEval(code + '\n', stdin).then((res: EvalResult) => {
+        
+        let codeToEval =
+            props.mode === 'editor' && codeEditorIdx == 1
+                ? code + '\n' + testingCode
+                : code + '\n'
+        pyEval(codeToEval, stdin).then((res: EvalResult) => {
             if (variables.length > 0 && res?.error) {
                 setIsLoading(true)
             } else {
@@ -97,7 +102,7 @@ function Playground(props: PlaygroundProps) {
             }
             console.log(res)
         })
-    }, [code, stdin, testingCode, testingInput])
+    }, [code, stdin, testingCode, testingInput, codeEditorIdx])
 
     React.useEffect(() => {
         try {
@@ -154,7 +159,7 @@ function Playground(props: PlaygroundProps) {
                         padding: 10,
                         fontSize: 10,
                         fontWeight: 700,
-                        fontFamily: 'Muller',
+                        fontFamily: 'Montserrat',
                     }}
                 >
                     P1 Lab Playground
@@ -169,7 +174,7 @@ function Playground(props: PlaygroundProps) {
                 >
                     <span
                         style={{
-                            fontFamily: 'Muller',
+                            fontFamily: 'Montserrat',
                             fontWeight: 700,
                             color: '#FF3693',
                             fontSize: 16,
@@ -185,7 +190,6 @@ function Playground(props: PlaygroundProps) {
                 style={{
                     display: 'flex',
                     justifyContent: 'center',
-                    gap: 25,
                     flexDirection: 'row',
                     width: '100%',
                     height: '100%',
@@ -194,6 +198,7 @@ function Playground(props: PlaygroundProps) {
                 }}
             >
                 <div
+                    className="cell"
                     style={{
                         backgroundColor: '#FFFFFF',
                         flex: 2,
@@ -288,6 +293,7 @@ function Playground(props: PlaygroundProps) {
                 </div>
 
                 <div
+                    className="cell"
                     style={{
                         flex: 1,
                         height: 500,
@@ -333,7 +339,11 @@ function Playground(props: PlaygroundProps) {
                                 }}
                             >
                                 <h2
-                                    style={{ color: '#FF3693', marginLeft: 20 }}
+                                    style={{
+                                        color: '#FF3693',
+                                        marginLeft: 20,
+                                        fontFamily: 'Montserrat',
+                                    }}
                                 >
                                     Input
                                 </h2>
@@ -364,7 +374,11 @@ function Playground(props: PlaygroundProps) {
                                 }}
                             >
                                 <h2
-                                    style={{ color: '#FF3693', marginLeft: 20 }}
+                                    style={{
+                                        color: '#FF3693',
+                                        marginLeft: 20,
+                                        fontFamily: 'Montserrat',
+                                    }}
                                 >
                                     Output
                                 </h2>
@@ -384,7 +398,6 @@ function Playground(props: PlaygroundProps) {
                             style={{
                                 display: 'flex',
                                 justifyContent: 'center',
-                                gap: 15,
                                 padding: 30,
                             }}
                         >
@@ -409,10 +422,11 @@ function Playground(props: PlaygroundProps) {
                 </div>
                 {props.mode == 'editor' && (
                     <div
+                        className="cell"
                         style={{
                             backgroundColor: '#FFFFFF',
                             flex: 2,
-                            height: 500,
+                            height: 700,
                             minWidth: 500,
                             padding: 40,
                             resize: 'horizontal',
@@ -424,7 +438,7 @@ function Playground(props: PlaygroundProps) {
                     >
                         <span
                             style={{
-                                fontFamily: 'Muller',
+                                fontFamily: 'Montserrat',
                                 fontWeight: 700,
                                 color: '#FF3693',
                                 fontSize: 26,
@@ -432,7 +446,7 @@ function Playground(props: PlaygroundProps) {
                         >
                             Testing
                         </span>
-
+                        <textarea style={{width: 500, height: 700}} value={injectPyCode(code, '<>', '</>')} />
                         {JSON.stringify(testResults)}
                     </div>
                 )}

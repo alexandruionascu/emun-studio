@@ -72,6 +72,7 @@ class VariableBox extends React.Component<Props, State> {
                     isVisible={this.state.isBoxVisible}
                 >
                     <div
+                        className="variable-box"
                         style={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -80,8 +81,6 @@ class VariableBox extends React.Component<Props, State> {
                             height: 25,
                             borderRadius: 7,
                             padding: 10,
-                            marginLeft: 3,
-                            marginRight: 3,
                             color: '#948E96',
                             borderImageSlice: 1,
                             textAlign: 'center',
@@ -89,7 +88,7 @@ class VariableBox extends React.Component<Props, State> {
                             filter: this.props.loading ? 'blur(1px)' : 'unset',
                             position: 'relative',
                             fontWeight: 700,
-                            fontFamily: 'Muller',
+                            fontFamily: 'Montserrat',
                             lineHeight: 1.5,
                             overflowY: 'auto',
                             boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
@@ -113,7 +112,7 @@ class VariableBox extends React.Component<Props, State> {
                 </Animated>
                 <div
                     style={{
-                        fontFamily: 'Muller',
+                        fontFamily: 'Montserrat',
                         fontWeight: 300 /* this.props.isCurrentIdentifier ? 'bold' : 'normal' */,
                         textAlign: 'center',
                         marginTop: 10,
@@ -125,7 +124,7 @@ class VariableBox extends React.Component<Props, State> {
                             color: '#948E96',
                             fontWeight: 500,
                             marginTop: 10,
-                            fontFamily: 'Muller',
+                            fontFamily: 'Montserrat',
                             textAlign: 'center',
                         }}
                     >
