@@ -1,3 +1,4 @@
+import { notDeepEqual } from 'assert'
 import Task from 'task.js'
 import { builtinFiles } from './SkulptStdlib'
 const PyGrammarParser = require('./Py37Grammar')
@@ -189,17 +190,18 @@ export const pyEval = (
 }
 
 // DFS
-const getAllAssignmentsRec = (node: Code): Code[] => {
+const getAllAssignmentsRec = (node: Code, scope='global'): Code[] => {
     let assignments: Code[] = []
 
     if (node.type == 'assign' || node.type == 'for' || node.type == 'call') {
+        node.scope = scope
         assignments.push(node)
     }
 
     if (node.type == 'def') {
         if ((node as any).params.length > 0) {
             for (let param of (node as any).params) {
-                assignments.push(param)
+                assignments.push(param, (node as any).name)
             }
         }
     }
@@ -209,7 +211,7 @@ const getAllAssignmentsRec = (node: Code): Code[] => {
     }
     // look for children
     for (let childNode of node.code) {
-        assignments = assignments.concat(getAllAssignmentsRec(childNode))
+        assignments = assignments.concat(getAllAssignmentsRec(childNode, scope))
     }
     return assignments
 }
@@ -252,6 +254,36 @@ const tabsToSpaces = (data: string, tabSize = 4) => {
 
     return data
 }
+export interface VariableValue {
+  name: string;
+  value: string;
+  startCol: number;
+  startLine: number;
+  endCol: number;
+  endLine: number;
+}
+
+export const extractVariableValues = (
+  output: string,
+  startSeparator: string,
+  endSeparator: string): VariableValue[] => {
+  let varValues: VariableValue[] = [];
+  let start = output.split(startSeparator);
+  for (let elem of start) {
+      if (elem.trim().length > 0) {
+          let [startSep, varName, varValue, startLine, startCol, endLine, endCol, endSep] = elem.split('_');
+          varValues.push({
+              name: varName,
+              value: varValue,
+              startLine: parseInt(startLine),
+              startCol: parseInt(startCol),
+              endLine: parseInt(endLine),
+              endCol: parseInt(endCol)
+          });
+      }
+  }
+  return varValues;
+}
 
 export function injectPyCode(
     code: string,
@@ -262,7 +294,7 @@ export function injectPyCode(
     let noTabsCode = tabsToSpaces(code)
     try {
         let res: ParsedPython = PyGrammarParser.parse(noTabsCode + '\n')
-        console.log('res', res)
+        console.log(res)
         if (res.code || (res as any).params) {
             for (let childNode of res.code) {
                 assignments = assignments.concat(
@@ -270,12 +302,12 @@ export function injectPyCode(
                 )
             }
         }
-        console.log(assignments)
     } catch (ex) {
         console.log(ex)
     } finally {
     }
-
+    
+    console.log(assignments)
     let lineNum = 1
     let injectedLines: { [line: string]: boolean } = {}
     let lines = (noTabsCode + '\n').split('\n')
@@ -294,29 +326,35 @@ export function injectPyCode(
                 let varIds = []
                 if (assignment.type == 'parameter') {
                     varIds.push((assignment as any).name)
-                } else if(assignment.type == 'call') {
-                  // else it's just a function call, not a method
-                  if ((assignment as any)?.func?.value?.id) {
-                    varIds.push((assignment as any).func.value.id)
-                  }                
+                } else if (assignment.type == 'call') {
+                    // else it's just a function call, not a method
+                    if ((assignment as any)?.func?.value?.id) {
+                        varIds.push((assignment as any).func.value.id)
+                    }
                 } else if (assignment.targets?.length > 0) {
                     for (let target of assignment.targets) {
-                        console.log('target', target)
                         if (target.type == 'list' || target.type == 'tuple') {
                             for (let item of (target as any).items) {
                                 varIds.push(item.id)
                             }
-                        } else if(target.type == 'name') {
+                        } else if (target.type == 'name') {
                             varIds.push(target.id)
-                        } else if(target.type == 'dot' && (target as any).value.id) {
-                          varIds.push((target as any).value.id)
+                        } else if (
+                            target.type == 'dot' &&
+                            (target as any).value.id
+                        ) {
+                            varIds.push((target as any).value.id)
+                        } else if (
+                            target.type == 'index' &&
+                            (target as any).value.id
+                        ) {
+                            varIds.push((target as any).value.id)
                         }
                     }
                 } else {
-                    for (let target of assignment?.target ?? [] ) {
-                      varIds.push(target.id)
+                    for (let target of assignment?.target ?? []) {
+                        varIds.push(target.id)
                     }
-                    
                 }
                 let nextLine = lines[lineNum] ?? ''
                 const identValNextLine =
@@ -327,7 +365,7 @@ export function injectPyCode(
                         : identValNextLine
                 )
                 for (let varId of varIds) {
-                    const injectedLine = `${ident}print("${startSeparator}", "${varId}", ${varId}, "${endSeparator}", sep="_") #${hash}`
+                    const injectedLine = `${ident}print("${startSeparator}", "${varId}", ${varId}, ${assignment.location.first_line}, ${assignment.location.first_column}, ${assignment.location.last_line}, ${assignment.location.last_column}, "${endSeparator}", sep="_") #${hash}`
                     injectedLines[injectedLine] = true
                     newLines.push(injectedLine)
                 }
@@ -336,7 +374,6 @@ export function injectPyCode(
         lineNum++
     }
     const generatedCode = newLines.join('\n')
-    console.log(generatedCode)
     return generatedCode
 }
 
@@ -418,6 +455,7 @@ export interface DeclLocation {
 }
 
 export interface Code {
+    scope?: string,
     type: string
     targets: Target[]
     sources: Source[]

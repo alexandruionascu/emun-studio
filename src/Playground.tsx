@@ -1,7 +1,14 @@
 import React from 'react'
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import './Playground.css'
-import { EvalResult, injectPyCode, pyEval, Variable } from './eval/PyEval'
+import {
+    EvalResult,
+    extractVariableValues,
+    injectPyCode,
+    pyEval,
+    Variable,
+    VariableValue,
+} from './eval/PyEval'
 import Webcam from 'react-webcam'
 import { Animated } from 'react-animated-css'
 import SwipeableViews from 'react-swipeable-views'
@@ -74,6 +81,10 @@ function Playground(props: PlaygroundProps) {
     const [testingCode, setTestingCode] = React.useState(initialTestngCode)
     const [testingInput, setTestingInput] = React.useState(initialTestingInput)
     const [codeEditorIdx, setCodeEditorIdx] = React.useState(0)
+    const [variableValueIdx, setVariableValueIdx] = React.useState(0)
+    const [variableValues, setVariableValues] = React.useState<VariableValue[]>(
+        []
+    )
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
     const [testResults, setTestResults] = React.useState<{
@@ -81,11 +92,29 @@ function Playground(props: PlaygroundProps) {
     }>({})
 
     React.useEffect(() => {
-        
         let codeToEval =
             props.mode === 'editor' && codeEditorIdx == 1
                 ? code + '\n' + testingCode
                 : code + '\n'
+
+        const stepByStepCode = injectPyCode(
+            code + '\n',
+            startSeparator,
+            endSeparator
+        )
+
+        pyEval(stepByStepCode, stdin).then((res) => {
+            if (res.output) {
+                console.log(res.output)
+                const variables = extractVariableValues(
+                    res.output,
+                    startSeparator,
+                    endSeparator
+                )
+
+                setVariableValues(variables)
+            }
+        })
         pyEval(codeToEval, stdin).then((res: EvalResult) => {
             if (variables.length > 0 && res?.error) {
                 setIsLoading(true)
@@ -180,7 +209,7 @@ function Playground(props: PlaygroundProps) {
                             fontSize: 16,
                         }}
                     >
-                        by Alex Ionașcu
+                        Alex Ionașcu
                     </span>
                     <img src={Memomji} height={50} />
                 </div>
@@ -224,6 +253,15 @@ function Playground(props: PlaygroundProps) {
                         <CodeMirror
                             className="code-editor"
                             value={code}
+                            selection={{
+                                ranges: [
+                                    {
+                                        anchor: { ch: 10, line: 0 },
+                                        head: { ch: 5, line: 0 },
+                                    },
+                                ],
+                                focus: true, // defaults false if not specified
+                            }}
                             options={{
                                 mode: 'python',
                                 theme: 'default',
@@ -394,22 +432,35 @@ function Playground(props: PlaygroundProps) {
                                 />
                             </div>
                         </div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                padding: 30,
-                            }}
-                        >
-                            {variables.map((v, i) => (
-                                <VariableBox
-                                    loading={isLoading}
-                                    colorOrder={i}
-                                    variableName={v.name}
-                                    variableValue={v.value}
-                                    key={i}
-                                />
-                            ))}
+                        <div>
+                            <input
+                                type="range"
+                                min={0}
+                                max={variableValues.length - 1}
+                                onChange={(e) =>
+                                    setVariableValueIdx(
+                                        parseInt(e.target.value)
+                                    )
+                                }
+                                value={variableValueIdx}
+                            />
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    padding: 30,
+                                }}
+                            >
+                                {variableValues.map((v, i) => (
+                                    <VariableBox
+                                        loading={isLoading}
+                                        colorOrder={i}
+                                        variableName={v.name}
+                                        variableValue={v.value}
+                                        key={i}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </SwipeableViews>
                     <Pagination
@@ -446,7 +497,10 @@ function Playground(props: PlaygroundProps) {
                         >
                             Testing
                         </span>
-                        <textarea style={{width: 500, height: 700}} value={injectPyCode(code, '<>', '</>')} />
+                        <textarea
+                            style={{ width: 700, height: 700 }}
+                            value={injectPyCode(code, '<>', '</>')}
+                        />
                         {JSON.stringify(testResults)}
                     </div>
                 )}
