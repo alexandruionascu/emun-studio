@@ -261,6 +261,7 @@ export interface VariableValue {
   startLine: number;
   endCol: number;
   endLine: number;
+  scope: string;
 }
 
 export const extractVariableValues = (
@@ -271,14 +272,15 @@ export const extractVariableValues = (
   let start = output.split(startSeparator);
   for (let elem of start) {
       if (elem.trim().length > 0) {
-          let [startSep, varName, varValue, startLine, startCol, endLine, endCol, endSep] = elem.split('_');
+          let [startSep, varName, varValue, startLine, startCol, endLine, endCol, scope, endSep] = elem.split('$');
           varValues.push({
               name: varName,
               value: varValue,
               startLine: parseInt(startLine),
               startCol: parseInt(startCol),
               endLine: parseInt(endLine),
-              endCol: parseInt(endCol)
+              endCol: parseInt(endCol),
+              scope: scope
           });
       }
   }
@@ -295,10 +297,15 @@ export function injectPyCode(
     try {
         let res: ParsedPython = PyGrammarParser.parse(noTabsCode + '\n')
         console.log(res)
+        
         if (res.code || (res as any).params) {
             for (let childNode of res.code) {
+                let scope = 'global'
+                if (childNode.type == 'def') {
+                  scope = (childNode as any).name
+                }
                 assignments = assignments.concat(
-                    getAllAssignmentsRec(childNode)
+                    getAllAssignmentsRec(childNode, scope)
                 )
             }
         }
@@ -365,7 +372,7 @@ export function injectPyCode(
                         : identValNextLine
                 )
                 for (let varId of varIds) {
-                    const injectedLine = `${ident}print("${startSeparator}", "${varId}", ${varId}, ${assignment.location.first_line}, ${assignment.location.first_column}, ${assignment.location.last_line}, ${assignment.location.last_column}, "${endSeparator}", sep="_") #${hash}`
+                    const injectedLine = `${ident}print("${startSeparator}", "${varId}", ${varId}, ${assignment.location.first_line}, ${assignment.location.first_column}, ${assignment.location.last_line}, ${assignment.location.last_column}, "${assignment.scope}", "${endSeparator}", sep="$") #${hash}`
                     injectedLines[injectedLine] = true
                     newLines.push(injectedLine)
                 }
