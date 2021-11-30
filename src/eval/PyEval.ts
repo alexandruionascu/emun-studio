@@ -1,4 +1,3 @@
-import { notDeepEqual } from 'assert'
 import Task from 'task.js'
 import { builtinFiles } from './SkulptStdlib'
 const PyGrammarParser = require('./Py37Grammar')
@@ -173,7 +172,7 @@ export const pyEval = (
                         }
                     }
                 }
-            } catch (e) {
+            } catch (e: any) {
                 return {
                     output: stdOut,
                     error: e.toString(),
@@ -257,32 +256,47 @@ const tabsToSpaces = (data: string, tabSize = 4) => {
 export interface VariableValue {
     name: string
     value: string
-    startCol: number
-    startLine: number
-    endCol: number
-    endLine: number
+    location: Location
     scope: string
+}
+
+export interface Scope {
+    scope: string
+    variables: VariableValue[]
+}
+export interface StepByStepVariables {
+    history: Scope[]
+    locations: Location[]
 }
 
 export const extractVariableValues = (
     output: string,
     startSeparator: string,
     endSeparator: string
-): VariableValue[][] => {
+): StepByStepVariables => {
     let varValues: VariableValue[][] = []
-    let row: { [varName: string]: VariableValue } = {}
+    let currentVariables: { [varName: string]: VariableValue } = {}
     let start = output.split(startSeparator)
-    let currentScope = 'global'
+    let currentScopeName = 'global'
+    let locations: Location[] = []
+    let scopeHistory: Scope[] = []
 
-    const addRow = () => {
-        let copyRow = []
-        for (let key in row) {
-            copyRow.push(row[key])
+    const addScope = () => {
+        // we make a copy since Object.values
+        // doens't seem to work here
+        let copy = []
+        for (let key in currentVariables) {
+            copy.push(currentVariables[key])
         }
-        if (copyRow.length > 0) {
-            varValues.push(copyRow)
+
+        if (copy.length > 0) {
+            scopeHistory.push({
+                variables: copy,
+                scope: currentScopeName,
+            })
         }
     }
+
     for (const elem of start) {
         if (elem.trim().length > 0) {
             const [
@@ -296,26 +310,43 @@ export const extractVariableValues = (
                 scope,
                 endSep,
             ] = elem.split('$')
-            if (currentScope !== scope) {
-                addRow()
-                currentScope = scope
-                row = {}
+            if (currentScopeName !== scope) {
+                addScope()
+                locations.push({
+                    first_line: parseInt(startLine),
+                    first_column: parseInt(startCol),
+                    last_line: parseInt(endLine),
+                    last_column: parseInt(endCol),
+                })
+                currentScopeName = scope
+                currentVariables = {}
             }
-            row[varName] = {
+            currentVariables[varName] = {
                 name: varName,
                 value: varValue,
-                startLine: parseInt(startLine),
-                startCol: parseInt(startCol),
-                endLine: parseInt(endLine),
-                endCol: parseInt(endCol),
+                location: {
+                    first_line: parseInt(startLine),
+                    first_column: parseInt(startCol),
+                    last_line: parseInt(endLine),
+                    last_column: parseInt(endCol),
+                },
                 scope: scope,
             }
 
-            addRow()
+            addScope()
+            locations.push({
+                first_column: parseInt(startCol),
+                first_line: parseInt(startLine),
+                last_line: parseInt(endLine),
+                last_column: parseInt(endCol),
+            })
         }
     }
 
-    return varValues
+    return {
+        history: scopeHistory,
+        locations: locations,
+    }
 }
 
 export function injectPyCode(

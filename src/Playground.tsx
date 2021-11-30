@@ -6,6 +6,9 @@ import {
     extractVariableValues,
     injectPyCode,
     pyEval,
+    Location,
+    Scope,
+    StepByStepVariables,
     Variable,
     VariableValue,
 } from './eval/PyEval'
@@ -65,7 +68,12 @@ test2: |
    1 2 3 4 5
 `
 
-const initialCode = `# here goes your Python code`
+const initialCode = `# here goes your Python code
+x = 0
+for i in range(10):
+    x += i
+    print(i)
+    `
 
 const initialTestngCode = `# here goes your testing code`
 
@@ -80,8 +88,26 @@ function Playground(props: PlaygroundProps) {
     const [testingInput, setTestingInput] = React.useState(initialTestingInput)
     const [codeEditorIdx, setCodeEditorIdx] = React.useState(0)
     const [variableValueIdx, setVariableValueIdx] = React.useState(0)
-    const [variableHistory, setVariableHistory] = React.useState<VariableValue[][]>([]);
-    const variableValues = variableValueIdx >= variableHistory.length ? [] : variableHistory[variableValueIdx];
+    const [stepByStep, setStepByStep] = React.useState<StepByStepVariables>();
+    const [currentLocation, setCurrentLocation] = React.useState<Location | null>(null);
+
+    React.useEffect(() => {
+        if (stepByStep?.locations && stepByStep?.locations[variableValueIdx] && variableValueIdx != stepByStep.locations.length - 1) {
+            setCurrentLocation(stepByStep.locations[variableValueIdx] ?? null)
+        }
+        
+    }, [variableValueIdx])
+
+    console.log(currentLocation)
+    let variableValues: Scope = {
+        scope: 'global',
+        variables: []
+    }
+    if (stepByStep?.history) {
+        variableValues = stepByStep.history[variableValueIdx];
+    }
+
+
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
     const [testResults, setTestResults] = React.useState<{
@@ -103,13 +129,12 @@ function Playground(props: PlaygroundProps) {
         pyEval(stepByStepCode, stdin).then((res) => {
             if (res.output) {
                 console.log(res.output)
-                const varHistory = extractVariableValues(
+                const stepByStep = extractVariableValues(
                     res.output,
                     startSeparator,
                     endSeparator
                 )
-
-                setVariableHistory(varHistory ?? [])
+                setStepByStep(stepByStep)
             }
         })
         pyEval(codeToEval, stdin).then((res: EvalResult) => {
@@ -153,7 +178,7 @@ function Playground(props: PlaygroundProps) {
                     })
                 })
                 .then(() => setTestIdxToRun(testIdxToRun + 1))
-        } catch (err) {
+        } catch (err: any) {
             // YAML parse fails
             console.log(err)
             setError(err.toString())
@@ -161,8 +186,10 @@ function Playground(props: PlaygroundProps) {
     }, [testIdxToRun])
 
     React.useEffect(() => {
-        setVariableValueIdx(variableHistory.length - 1)
-    }, [variableHistory])
+        if (stepByStep?.history) {
+            setVariableValueIdx(stepByStep?.history.length - 1)
+        }
+    }, [stepByStep])
 
     return (
         <div style={{ width: '100%', height: '100%' }}>
@@ -254,15 +281,14 @@ function Playground(props: PlaygroundProps) {
                         <CodeMirror
                             className="code-editor"
                             value={code}
+                            key={Date.now()}
                             selection={{
-                                ranges: [
-                                    {
-                                        anchor: { ch: 10, line: 0 },
-                                        head: { ch: 5, line: 0 },
-                                    },
-                                ],
-                                focus: true, // defaults false if not specified
-                            }}
+                                ranges: [{
+                                  anchor: {ch: currentLocation?.first_column ? currentLocation.first_column : 0, line: currentLocation?.first_line ? currentLocation.first_line - 1 : 0},
+                                  head: {ch: currentLocation?.last_column ? currentLocation.last_column : 0, line: currentLocation?.last_line ? currentLocation.last_line - 1 : 0}
+                                }],
+                                focus: true // defaults false if not specified
+                              }}
                             options={{
                                 mode: 'python',
                                 theme: 'default',
@@ -275,6 +301,7 @@ function Playground(props: PlaygroundProps) {
                             <CodeMirror
                                 className="code-editor"
                                 value={testingCode}
+                                key={Date.now()}
                                 options={{
                                     mode: 'python',
                                     theme: 'default',
@@ -288,6 +315,7 @@ function Playground(props: PlaygroundProps) {
                             <CodeMirror
                                 className="code-editor"
                                 value={testingInput}
+                                key={Date.now()}
                                 options={{
                                     mode: 'text/x-yaml',
                                     theme: 'default',
@@ -437,7 +465,7 @@ function Playground(props: PlaygroundProps) {
                             <input
                                 type="range"
                                 min={0}
-                                max={variableHistory.length - 1}
+                                max={stepByStep?.history ? stepByStep.history.length - 1 : 0}
                                 onChange={(e) =>
                                     setVariableValueIdx(
                                         parseInt(e.target.value)
@@ -452,7 +480,7 @@ function Playground(props: PlaygroundProps) {
                                     padding: 30,
                                 }}
                             >
-                                {(variableValues ?? []).map((v, i) => (
+                                {(variableValues?.variables ? variableValues.variables : []).map((v, i) => (
                                     <VariableBox
                                         loading={isLoading}
                                         colorOrder={i}
