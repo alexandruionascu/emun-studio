@@ -190,7 +190,7 @@ export const pyEval = (
 }
 
 // DFS
-const getAllAssignmentsRec = (node: Code, scope='global'): Code[] => {
+const getAllAssignmentsRec = (node: Code, scope = 'global'): Code[] => {
     let assignments: Code[] = []
 
     if (node.type == 'assign' || node.type == 'for' || node.type == 'call') {
@@ -255,36 +255,67 @@ const tabsToSpaces = (data: string, tabSize = 4) => {
     return data
 }
 export interface VariableValue {
-  name: string;
-  value: string;
-  startCol: number;
-  startLine: number;
-  endCol: number;
-  endLine: number;
-  scope: string;
+    name: string
+    value: string
+    startCol: number
+    startLine: number
+    endCol: number
+    endLine: number
+    scope: string
 }
 
 export const extractVariableValues = (
-  output: string,
-  startSeparator: string,
-  endSeparator: string): VariableValue[] => {
-  let varValues: VariableValue[] = [];
-  let start = output.split(startSeparator);
-  for (let elem of start) {
-      if (elem.trim().length > 0) {
-          let [startSep, varName, varValue, startLine, startCol, endLine, endCol, scope, endSep] = elem.split('$');
-          varValues.push({
-              name: varName,
-              value: varValue,
-              startLine: parseInt(startLine),
-              startCol: parseInt(startCol),
-              endLine: parseInt(endLine),
-              endCol: parseInt(endCol),
-              scope: scope
-          });
-      }
-  }
-  return varValues;
+    output: string,
+    startSeparator: string,
+    endSeparator: string
+): VariableValue[][] => {
+    let varValues: VariableValue[][] = []
+    let row: { [varName: string]: VariableValue } = {}
+    let start = output.split(startSeparator)
+    let currentScope = 'global'
+
+    const addRow = () => {
+        let copyRow = []
+        for (let key in row) {
+            copyRow.push(row[key])
+        }
+        if (copyRow.length > 0) {
+            varValues.push(copyRow)
+        }
+    }
+    for (const elem of start) {
+        if (elem.trim().length > 0) {
+            const [
+                startSep,
+                varName,
+                varValue,
+                startLine,
+                startCol,
+                endLine,
+                endCol,
+                scope,
+                endSep,
+            ] = elem.split('$')
+            if (currentScope !== scope) {
+                addRow()
+                currentScope = scope
+                row = {}
+            }
+            row[varName] = {
+                name: varName,
+                value: varValue,
+                startLine: parseInt(startLine),
+                startCol: parseInt(startCol),
+                endLine: parseInt(endLine),
+                endCol: parseInt(endCol),
+                scope: scope,
+            }
+
+            addRow()
+        }
+    }
+
+    return varValues
 }
 
 export function injectPyCode(
@@ -297,12 +328,12 @@ export function injectPyCode(
     try {
         let res: ParsedPython = PyGrammarParser.parse(noTabsCode + '\n')
         console.log(res)
-        
+
         if (res.code || (res as any).params) {
             for (let childNode of res.code) {
                 let scope = 'global'
                 if (childNode.type == 'def') {
-                  scope = (childNode as any).name
+                    scope = (childNode as any).name
                 }
                 assignments = assignments.concat(
                     getAllAssignmentsRec(childNode, scope)
@@ -313,7 +344,7 @@ export function injectPyCode(
         console.log(ex)
     } finally {
     }
-    
+
     console.log(assignments)
     let lineNum = 1
     let injectedLines: { [line: string]: boolean } = {}
@@ -328,7 +359,7 @@ export function injectPyCode(
             if (assignment.type == 'for') {
                 assignment.location = assignment.decl_location
             }
-            if (assignment.location.last_line === lineNum) {
+            if (assignment.location?.last_line === lineNum) {
                 const hash = Math.random().toString(36).substring(7)
                 let varIds = []
                 if (assignment.type == 'parameter') {
@@ -462,7 +493,7 @@ export interface DeclLocation {
 }
 
 export interface Code {
-    scope?: string,
+    scope?: string
     type: string
     targets: Target[]
     sources: Source[]

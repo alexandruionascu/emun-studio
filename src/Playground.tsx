@@ -16,8 +16,6 @@ import VariableBox from './VariableBox'
 import Pagination from './components/Pagination'
 import YAML from 'yaml'
 import Memomji from './memoji.png'
-import { exception } from 'console'
-import { textChangeRangeIsUnchanged } from 'typescript'
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/seti.css')
 require('codemirror/mode/python/python')
@@ -82,9 +80,8 @@ function Playground(props: PlaygroundProps) {
     const [testingInput, setTestingInput] = React.useState(initialTestingInput)
     const [codeEditorIdx, setCodeEditorIdx] = React.useState(0)
     const [variableValueIdx, setVariableValueIdx] = React.useState(0)
-    const [variableValues, setVariableValues] = React.useState<VariableValue[]>(
-        []
-    )
+    const [variableHistory, setVariableHistory] = React.useState<VariableValue[][]>([]);
+    const variableValues = variableValueIdx >= variableHistory.length ? [] : variableHistory[variableValueIdx];
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
     const [testResults, setTestResults] = React.useState<{
@@ -106,13 +103,13 @@ function Playground(props: PlaygroundProps) {
         pyEval(stepByStepCode, stdin).then((res) => {
             if (res.output) {
                 console.log(res.output)
-                const variables = extractVariableValues(
+                const varHistory = extractVariableValues(
                     res.output,
                     startSeparator,
                     endSeparator
                 )
 
-                setVariableValues(variables)
+                setVariableHistory(varHistory ?? [])
             }
         })
         pyEval(codeToEval, stdin).then((res: EvalResult) => {
@@ -162,6 +159,10 @@ function Playground(props: PlaygroundProps) {
             setError(err.toString())
         }
     }, [testIdxToRun])
+
+    React.useEffect(() => {
+        setVariableValueIdx(variableHistory.length - 1)
+    }, [variableHistory])
 
     return (
         <div style={{ width: '100%', height: '100%' }}>
@@ -436,7 +437,7 @@ function Playground(props: PlaygroundProps) {
                             <input
                                 type="range"
                                 min={0}
-                                max={variableValues.length - 1}
+                                max={variableHistory.length - 1}
                                 onChange={(e) =>
                                     setVariableValueIdx(
                                         parseInt(e.target.value)
@@ -451,7 +452,7 @@ function Playground(props: PlaygroundProps) {
                                     padding: 30,
                                 }}
                             >
-                                {variableValues.map((v, i) => (
+                                {(variableValues ?? []).map((v, i) => (
                                     <VariableBox
                                         loading={isLoading}
                                         colorOrder={i}
