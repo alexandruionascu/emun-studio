@@ -10,6 +10,14 @@
   margin: 8px;
 }
 
+.monaco-inline-highlight {
+  font-weight: bold;
+}
+
+.monaco-highlight {
+  background: #EAEAEA;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

@@ -18,6 +18,7 @@ import SwipeableViews from 'react-swipeable-views'
 import VariableBox from './VariableBox'
 import Pagination from './components/Pagination'
 import YAML from 'yaml'
+import Editor, { useMonaco } from '@monaco-editor/react'
 import Memomji from './memoji.png'
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/seti.css')
@@ -78,6 +79,23 @@ for i in range(10):
 const initialTestngCode = `# here goes your testing code`
 
 function Playground(props: PlaygroundProps) {
+    const editorRef = React.useRef(null)
+    const handleEditorDidMount = (editor: any, monaco: any) => {
+        editorRef.current = editor; 
+      }
+    const monaco = useMonaco()
+
+    React.useEffect(() => {
+        // do conditional chaining
+        monaco?.languages.typescript.javascriptDefaults.setEagerModelSync(true)
+        // or make sure that it exists by other ways
+        if (monaco) {
+            console.log('here is the monaco instance:', monaco.editor)
+        }
+    }, [monaco])
+
+    let [monacoDecorations, setMonacoDecorations] = React.useState([])
+
     const [code, setCode] = React.useState<string>(initialCode)
     const [stdin, setStdin] = React.useState<string>('')
     const [stdout, setStdout] = React.useState<string>('')
@@ -88,25 +106,47 @@ function Playground(props: PlaygroundProps) {
     const [testingInput, setTestingInput] = React.useState(initialTestingInput)
     const [codeEditorIdx, setCodeEditorIdx] = React.useState(0)
     const [variableValueIdx, setVariableValueIdx] = React.useState(0)
-    const [stepByStep, setStepByStep] = React.useState<StepByStepVariables>();
-    const [currentLocation, setCurrentLocation] = React.useState<Location | null>(null);
+    const [stepByStep, setStepByStep] = React.useState<StepByStepVariables>()
+    const [currentLocation, setCurrentLocation] =
+        React.useState<Location | null>(null)
 
     React.useEffect(() => {
-        if (stepByStep?.locations && stepByStep?.locations[variableValueIdx] && variableValueIdx != stepByStep.locations.length - 1) {
+        if (
+            stepByStep?.locations &&
+            stepByStep?.locations[variableValueIdx] &&
+            variableValueIdx != stepByStep.locations.length - 1
+        ) {
             setCurrentLocation(stepByStep.locations[variableValueIdx] ?? null)
         }
-        
     }, [variableValueIdx])
+
+    React.useEffect(() => {
+        if (!currentLocation) return
+
+
+        setMonacoDecorations((editorRef?.current as any).deltaDecorations(monacoDecorations, [{
+            range: {
+                startLineNumber: currentLocation.first_line,
+                endLineNumber: currentLocation.last_line,
+                startColumn: currentLocation.first_column,
+                endColumn: currentLocation.last_column + 1
+            },
+            options: {
+                inlineClassName: 'monaco-inline-highlight',
+                className: 'monaco-highlight'
+            }
+
+        }]))
+    }, [currentLocation])
 
     console.log(currentLocation)
     let variableValues: Scope = {
         scope: 'global',
-        variables: []
+        variables: [],
     }
     if (stepByStep?.history) {
-        variableValues = stepByStep.history[variableValueIdx];
+        variableValues = stepByStep.history[variableValueIdx]
     }
-
 
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
@@ -278,17 +318,26 @@ function Playground(props: PlaygroundProps) {
                         }
                         style={{ height: '100%' }}
                     >
+                        <Editor
+                            height="90%"
+                            defaultLanguage="python"
+                            defaultValue={initialCode}
+                            onMount={handleEditorDidMount}
+                            onChange={(value, event) => {
+                                setCode(value ?? '')
+                              }}
+                        />
                         <CodeMirror
                             className="code-editor"
                             value={code}
                             key={Date.now()}
-                            selection={{
+                            /*selection={{
                                 ranges: [{
                                   anchor: {ch: currentLocation?.first_column ? currentLocation.first_column : 0, line: currentLocation?.first_line ? currentLocation.first_line - 1 : 0},
                                   head: {ch: currentLocation?.last_column ? currentLocation.last_column : 0, line: currentLocation?.last_line ? currentLocation.last_line - 1 : 0}
                                 }],
                                 focus: true // defaults false if not specified
-                              }}
+                              }}*/
                             options={{
                                 mode: 'python',
                                 theme: 'default',
@@ -465,7 +514,11 @@ function Playground(props: PlaygroundProps) {
                             <input
                                 type="range"
                                 min={0}
-                                max={stepByStep?.history ? stepByStep.history.length - 1 : 0}
+                                max={
+                                    stepByStep?.history
+                                        ? stepByStep.history.length - 1
+                                        : 0
+                                }
                                 onChange={(e) =>
                                     setVariableValueIdx(
                                         parseInt(e.target.value)
@@ -480,7 +533,10 @@ function Playground(props: PlaygroundProps) {
                                     padding: 30,
                                 }}
                             >
-                                {(variableValues?.variables ? variableValues.variables : []).map((v, i) => (
+                                {(variableValues?.variables
+                                    ? variableValues.variables
+                                    : []
+                                ).map((v, i) => (
                                     <VariableBox
                                         loading={isLoading}
                                         colorOrder={i}
