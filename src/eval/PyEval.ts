@@ -396,9 +396,16 @@ export function injectPyCode(
                 if (assignment.type == 'parameter') {
                     varIds.push((assignment as any).name)
                 } else if (assignment.type == 'call') {
+                    console.log('hey its a call', assignment)
                     // else it's just a function call, not a method
                     if ((assignment as any)?.func?.value?.id) {
                         varIds.push((assignment as any).func.value.id)
+                    } else {
+                        for (let arg of (assignment as any).args ?? []) {
+                            if (arg?.actual?.id) {
+                                varIds.push(arg.actual.id)
+                            }
+                        }
                     }
                 } else if (assignment.targets?.length > 0) {
                     for (let target of assignment.targets) {
