@@ -40,8 +40,13 @@ export const pyEval = (
     return task.run(
         (code: string, consoleInput: string) => {
             Sk.builtinFiles = skulptBuiltinFiles
-            let readModule = (module: any) => Sk.builtinFiles['files'][module]
+            let readModule = (module: any) => {
+                if (module == 'file') 
+                    return 'ok'
+                return Sk.builtinFiles['files'][module]
+            }
             Sk.python3 = true
+            Sk.inBrowser = true
             Sk.externalLibraries = {
                 numpy: {
                     path: 'https://raw.githubusercontent.com/waywaaard/skulpt_numpy/master/numpy/__init__.js',
@@ -173,6 +178,7 @@ export const pyEval = (
                     }
                 }
             } catch (e: any) {
+                console.log(e)
                 return {
                     output: stdOut,
                     error: e.toString(),

@@ -1198,6 +1198,11 @@
   "resolved" "https://registry.npmjs.org/@csstools/normalize.css/-/normalize.css-10.1.0.tgz"
   "version" "10.1.0"
 
+"@devbookhq/splitter@^1.2.4":
+  "integrity" "sha512-g7WOqG5fxraYSVVnJgGrROw+ebuczrtOt7X+ilq5n3m7ge4I6esMQzlo+A3qQdOdNLmBg+e9U38edeHuZrIdhQ=="
+  "resolved" "https://registry.npmjs.org/@devbookhq/splitter/-/splitter-1.2.4.tgz"
+  "version" "1.2.4"
+
 "@emotion/cache@^11.6.0":
   "integrity" "sha512-ElbsWY1KMwEowkv42vGo0UPuLgtPYfIs9BxxVrmvsaJVvktknsHYYlx5NQ5g6zLDcOTyamlDc7FkRg2TAcQDKQ=="
   "resolved" "https://registry.npmjs.org/@emotion/cache/-/cache-11.6.0.tgz"

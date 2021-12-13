@@ -87,7 +87,7 @@ class VariableBox extends React.Component<Props, State> {
                             boxSizing: 'content-box',
                             filter: this.props.loading ? 'blur(1px)' : 'unset',
                             position: 'relative',
-                            fontWeight: 700,
+                            fontWeight: 500,
                             fontFamily: 'Montserrat',
                             lineHeight: 1.5,
                             overflowY: 'auto',

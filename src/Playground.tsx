@@ -14,12 +14,22 @@ import {
 } from './eval/PyEval'
 import Webcam from 'react-webcam'
 import { Animated } from 'react-animated-css'
+import Splitter, { SplitDirection } from '@devbookhq/splitter'
 import SwipeableViews from 'react-swipeable-views'
 import VariableBox from './VariableBox'
 import Pagination from './components/Pagination'
 import YAML from 'yaml'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import Memomji from './memoji.png'
+import ClipLoader from 'react-spinners/ClipLoader'
+import {
+    runCode,
+    getVariables,
+    setVariable,
+    clearVariables,
+    setOptions,
+} from './ClientSideRunner'
+import { Footer } from './components/Footer'
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/seti.css')
 require('codemirror/mode/python/python')
@@ -35,14 +45,6 @@ const Dot = (props: { backgroundColor: string }) => (
             margin: 2.5,
         }}
     />
-)
-
-const WindowButtons = () => (
-    <div style={{ paddingBottom: 7 }}>
-        <Dot backgroundColor="#FD5F56" />
-        <Dot backgroundColor="#FEBD2E" />
-        <Dot backgroundColor="#26C93F" />
-    </div>
 )
 
 const startSeparator = Math.random().toString(36).substring(7)
@@ -81,8 +83,8 @@ const initialTestngCode = `# here goes your testing code`
 function Playground(props: PlaygroundProps) {
     const editorRef = React.useRef(null)
     const handleEditorDidMount = (editor: any, monaco: any) => {
-        editorRef.current = editor; 
-      }
+        editorRef.current = editor
+    }
     const monaco = useMonaco()
 
     React.useEffect(() => {
@@ -123,20 +125,22 @@ function Playground(props: PlaygroundProps) {
     React.useEffect(() => {
         if (!currentLocation) return
 
-
-        setMonacoDecorations((editorRef?.current as any).deltaDecorations(monacoDecorations, [{
-            range: {
-                startLineNumber: currentLocation.first_line,
-                endLineNumber: currentLocation.last_line,
-                startColumn: currentLocation.first_column,
-                endColumn: currentLocation.last_column + 1
-            },
-            options: {
-                inlineClassName: 'monaco-inline-highlight',
-                className: 'monaco-highlight'
-            }
-
-        }]))
+        setMonacoDecorations(
+            (editorRef?.current as any).deltaDecorations(monacoDecorations, [
+                {
+                    range: {
+                        startLineNumber: currentLocation.first_line,
+                        endLineNumber: currentLocation.last_line,
+                        startColumn: currentLocation.first_column,
+                        endColumn: currentLocation.last_column + 1,
+                    },
+                    options: {
+                        inlineClassName: 'monaco-inline-highlight',
+                        className: 'monaco-highlight',
+                    },
+                },
+            ])
+        )
     }, [currentLocation])
 
     console.log(currentLocation)
@@ -155,6 +159,16 @@ function Playground(props: PlaygroundProps) {
     }>({})
 
     React.useEffect(() => {
+        // clear previous decorations when you code
+        if (editorRef?.current) {
+            setMonacoDecorations(
+                (editorRef?.current as any).deltaDecorations(
+                    monacoDecorations,
+                    []
+                )
+            )
+        }
+
         let codeToEval =
             props.mode === 'editor' && codeEditorIdx == 1
                 ? code + '\n' + testingCode
@@ -185,6 +199,7 @@ function Playground(props: PlaygroundProps) {
             }
 
             setStdout(res.output)
+            console.log(res?.error)
             setError(res?.error)
             if (!res?.error) {
                 setVariables(res?.variables ?? [])
@@ -282,35 +297,12 @@ function Playground(props: PlaygroundProps) {
                     <img src={Memomji} height={50} />
                 </div>
             </header>
-
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    width: '100%',
-                    height: '100%',
-                    padding: 15,
-                    flexWrap: 'wrap',
-                }}
+            <Splitter
+                minWidths={[300, 300]}
+                gutterClassName="cell-custom-gutter"
+                direction={SplitDirection.Horizontal}
             >
-                <div
-                    className="cell"
-                    style={{
-                        backgroundColor: '#FFFFFF',
-                        flex: 2,
-                        height: 500,
-                        minWidth: 500,
-                        padding: 15,
-                        resize: 'horizontal',
-
-                        borderRadius: 20,
-                        boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-                        position: 'relative',
-                    }}
-                >
-                    <WindowButtons />
-
+                <div className="cell" style={{ height: 650 }}>
                     <SwipeableViews
                         index={codeEditorIdx}
                         onChangeIndex={(newIndex: number) =>
@@ -319,38 +311,31 @@ function Playground(props: PlaygroundProps) {
                         style={{ height: '100%' }}
                     >
                         <Editor
-                            height="90%"
+                            height="100%"
                             defaultLanguage="python"
                             defaultValue={initialCode}
+                            loading={
+                                <ClipLoader
+                                    color={'#948E96'}
+                                    loading={true}
+                                    size={30}
+                                />
+                            }
+                            options={{
+                                fontFamily: 'Fira Code, monospace',
+                                //cursorStyle: 'block',
+                                formatOnType: true,
+                                fontLigatures: true,
+                            }}
                             onMount={handleEditorDidMount}
                             onChange={(value, event) => {
                                 setCode(value ?? '')
-                              }}
-                        />
-                        <CodeMirror
-                            className="code-editor"
-                            value={code}
-                            key={Date.now()}
-                            /*selection={{
-                                ranges: [{
-                                  anchor: {ch: currentLocation?.first_column ? currentLocation.first_column : 0, line: currentLocation?.first_line ? currentLocation.first_line - 1 : 0},
-                                  head: {ch: currentLocation?.last_column ? currentLocation.last_column : 0, line: currentLocation?.last_line ? currentLocation.last_line - 1 : 0}
-                                }],
-                                focus: true // defaults false if not specified
-                              }}*/
-                            options={{
-                                mode: 'python',
-                                theme: 'default',
-                            }}
-                            onBeforeChange={(editor, data, value) => {
-                                setCode(value)
                             }}
                         />
                         {props.mode == 'editor' && (
                             <CodeMirror
                                 className="code-editor"
                                 value={testingCode}
-                                key={Date.now()}
                                 options={{
                                     mode: 'python',
                                     theme: 'default',
@@ -364,7 +349,6 @@ function Playground(props: PlaygroundProps) {
                             <CodeMirror
                                 className="code-editor"
                                 value={testingInput}
-                                key={Date.now()}
                                 options={{
                                     mode: 'text/x-yaml',
                                     theme: 'default',
@@ -411,105 +395,63 @@ function Playground(props: PlaygroundProps) {
                 <div
                     className="cell"
                     style={{
-                        flex: 1,
-                        height: 500,
-                        padding: 15,
-                        minWidth: 500,
-                        overflow: 'scroll',
                         position: 'relative',
+                        height: 650,
                         display: 'flex',
                         flexWrap: 'wrap',
                         justifyContent: 'center',
-                        background: '#FFFFFF',
-                        borderRadius: 25,
-                        boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
                         flexDirection: 'column',
                     }}
                 >
-                    <SwipeableViews
-                        index={panelIdx}
-                        onChangeIndex={(newIndex: number) =>
-                            setPanelIdx(newIndex)
-                        }
-                        style={{ height: '100%' }}
+                    <Splitter
+                        direction={SplitDirection.Vertical}
+                        gutterClassName="cell-custom-gutter"
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                height: '100%',
-                                flexDirection: 'column',
-                            }}
-                        >
-                            <div
+                        <div>
+                            <h2
                                 style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: '100%',
-                                    background: '#FCFCFF',
-                                    flex: 1,
-                                    padding: 10,
-                                    margin: 35,
-                                    borderRadius: 20,
-                                    boxShadow:
-                                        'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+                                    color: '#FF3693',
+                                    marginLeft: 20,
+                                    fontFamily: 'Montserrat',
                                 }}
                             >
-                                <h2
-                                    style={{
-                                        color: '#FF3693',
-                                        marginLeft: 20,
-                                        fontFamily: 'Montserrat',
-                                    }}
-                                >
-                                    Input
-                                </h2>
-                                <textarea
-                                    style={{
-                                        fontSize: 10,
-                                        flex: '1 1',
-                                        border: 'none',
-                                        background: 'transparent',
-                                        resize: 'none',
-                                    }}
-                                    value={stdin}
-                                    onChange={(e) => setStdin(e.target.value)}
-                                />
-                            </div>
-
-                            <div
+                                Input
+                            </h2>
+                            <textarea
                                 style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    background: '#FCFCFF',
-                                    flex: 1,
-                                    padding: 10,
-                                    margin: 35,
-                                    borderRadius: 20,
-                                    boxShadow:
-                                        'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+                                    fontSize: 10,
+                                    flex: '1 1',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    resize: 'none',
                                 }}
-                            >
-                                <h2
-                                    style={{
-                                        color: '#FF3693',
-                                        marginLeft: 20,
-                                        fontFamily: 'Montserrat',
-                                    }}
-                                >
-                                    Output
-                                </h2>
-                                <textarea
-                                    style={{
-                                        fontSize: 10,
-                                        flex: '1 1',
-                                        border: 'none',
-                                        background: 'transparent',
-                                        resize: 'none',
-                                    }}
-                                    value={stdout}
-                                />
-                            </div>
+                                value={stdin}
+                                onChange={(e) => setStdin(e.target.value)}
+                            />
                         </div>
+
+                        <div>
+                            <h2
+                                style={{
+                                    color: '#FF3693',
+                                    marginLeft: 20,
+                                    fontFamily: 'Montserrat',
+                                }}
+                            >
+                                Output
+                            </h2>
+                            <textarea
+                                style={{
+                                    fontSize: 10,
+                                    flex: '1 1',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    resize: 'none',
+                                }}
+                                value={stdout}
+                            />
+                        </div>
+
                         <div>
                             <input
                                 type="range"
@@ -547,7 +489,7 @@ function Playground(props: PlaygroundProps) {
                                 ))}
                             </div>
                         </div>
-                    </SwipeableViews>
+                    </Splitter>
                     <Pagination
                         dots={2}
                         index={panelIdx}
@@ -556,7 +498,7 @@ function Playground(props: PlaygroundProps) {
                         }
                     />
                 </div>
-                {props.mode == 'editor' && (
+                {/* props.mode == 'editor' && (
                     <div
                         className="cell"
                         style={{
@@ -589,7 +531,8 @@ function Playground(props: PlaygroundProps) {
                         {JSON.stringify(testResults)}
                     </div>
                 )}
-            </div>
+               {/* <textarea id="filename">Hello from a textarea</textarea> */}
+            </Splitter>
 
             {/*<header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
@@ -631,6 +574,7 @@ function Playground(props: PlaygroundProps) {
         />
       </header>
             </div>*/}
+            <Footer />
         </div>
     )
 }
