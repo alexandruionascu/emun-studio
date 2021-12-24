@@ -3,17 +3,38 @@
 }
 
 .cell {
-  margin: 8px;
+  margin: 5px;
   width: 100%;
-  height: 100%;
   background-color: #FFFFFF;
-  padding: 15px;
-  border-radius: 20px;
+  padding: 20px;
+  border-radius: 7px;
+  max-width: 1000px;
+  min-width: 900px;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
+.indexedStep {
+  color: white;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  background-color: rgba(211, 211, 211, 0.8);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.indexedStep.accomplished {
+  background-color: rgba(0, 116, 217, 1);
+}
+
+.cell .__dbk__child-wrapper {
+  background: white;
+}
+
 .cell-custom-gutter {
-  background: transparent !important;
+  background: rgba(246, 241, 255, 0.35) !important;
 }
 
 .variable-box {

@@ -29,6 +29,8 @@ import {
     clearVariables,
     setOptions,
 } from './ClientSideRunner'
+import 'react-step-progress-bar/styles.css'
+import { ProgressBar, Step } from 'react-step-progress-bar'
 import { Footer } from './components/Footer'
 require('codemirror/lib/codemirror.css')
 require('codemirror/theme/seti.css')
@@ -108,6 +110,7 @@ function Playground(props: PlaygroundProps) {
     const [testingInput, setTestingInput] = React.useState(initialTestingInput)
     const [codeEditorIdx, setCodeEditorIdx] = React.useState(0)
     const [variableValueIdx, setVariableValueIdx] = React.useState(0)
+    const [percent, setPercent] = React.useState(0)
     const [stepByStep, setStepByStep] = React.useState<StepByStepVariables>()
     const [currentLocation, setCurrentLocation] =
         React.useState<Location | null>(null)
@@ -151,6 +154,13 @@ function Playground(props: PlaygroundProps) {
     if (stepByStep?.history) {
         variableValues = stepByStep.history[variableValueIdx]
     }
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setPercent(percent + 0.1)
+        }, 100)
+        return () => clearInterval(interval)
+    }, [percent])
 
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
@@ -297,21 +307,38 @@ function Playground(props: PlaygroundProps) {
                     <img src={Memomji} height={50} />
                 </div>
             </header>
-            <Splitter
-                minWidths={[300, 300]}
-                gutterClassName="cell-custom-gutter"
-                direction={SplitDirection.Horizontal}
+
+            <ProgressBar
+                percent={percent}
+                filledBackground="linear-gradient(to right, #FF3693, #FF3693)" />
+
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    flexWrap: 'wrap',
+                }}
             >
-                <div className="cell" style={{ height: 650 }}>
-                    <SwipeableViews
-                        index={codeEditorIdx}
-                        onChangeIndex={(newIndex: number) =>
-                            setCodeEditorIdx(newIndex)
-                        }
-                        style={{ height: '100%' }}
+                <div
+                    className="cell"
+                    style={{
+                        fontFamily: 'Montserrat',
+                        fontSize: 14,
+                        color: '#695D5D',
+                        marginTop: 40,
+                    }}
+                >
+                    Inverseaza dictonarul capitals si si numeste-l countries.
+                </div>
+                <div className="cell" style={{ marginBottom: 40 }}>
+                    <Splitter
+                        minWidths={[300, 300]}
+                        gutterClassName="cell-custom-gutter"
+                        direction={SplitDirection.Horizontal}
                     >
                         <Editor
-                            height="100%"
+                            height="400px"
                             defaultLanguage="python"
                             defaultValue={initialCode}
                             loading={
@@ -332,127 +359,13 @@ function Playground(props: PlaygroundProps) {
                                 setCode(value ?? '')
                             }}
                         />
-                        {props.mode == 'editor' && (
-                            <CodeMirror
-                                className="code-editor"
-                                value={testingCode}
-                                options={{
-                                    mode: 'python',
-                                    theme: 'default',
-                                }}
-                                onBeforeChange={(editor, data, value) => {
-                                    setTestingCode(value)
-                                }}
-                            />
-                        )}
-                        {props.mode == 'editor' && (
-                            <CodeMirror
-                                className="code-editor"
-                                value={testingInput}
-                                options={{
-                                    mode: 'text/x-yaml',
-                                    theme: 'default',
-                                }}
-                                onBeforeChange={(editor, data, value) => {
-                                    setTestingInput(value)
-                                }}
-                            />
-                        )}
-                    </SwipeableViews>
-                    {props.mode == 'editor' && (
-                        <Pagination
-                            dots={3}
-                            index={codeEditorIdx}
-                            onChangeIndex={(newIndex: number) =>
-                                setCodeEditorIdx(newIndex)
-                            }
-                        />
-                    )}
 
-                    {error && (
                         <div
                             style={{
-                                position: 'absolute',
-                                bottom: 15,
-                                margin: 'auto',
-                                maxWidth: 350,
-                                fontSize: 10,
-                                fontWeight: 700,
-                                textAlign: 'center',
-                                right: 0,
-                                left: 0,
-                                background: '#FF3693',
-                                color: 'white',
-                                padding: 15,
-                                borderRadius: 25,
+                                background: 'white !important',
+                                height: '100%',
                             }}
                         >
-                            {error as any}
-                        </div>
-                    )}
-                </div>
-
-                <div
-                    className="cell"
-                    style={{
-                        position: 'relative',
-                        height: 650,
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                    }}
-                >
-                    <Splitter
-                        direction={SplitDirection.Vertical}
-                        gutterClassName="cell-custom-gutter"
-                    >
-                        <div>
-                            <h2
-                                style={{
-                                    color: '#FF3693',
-                                    marginLeft: 20,
-                                    fontFamily: 'Montserrat',
-                                }}
-                            >
-                                Input
-                            </h2>
-                            <textarea
-                                style={{
-                                    fontSize: 10,
-                                    flex: '1 1',
-                                    border: 'none',
-                                    background: 'transparent',
-                                    resize: 'none',
-                                }}
-                                value={stdin}
-                                onChange={(e) => setStdin(e.target.value)}
-                            />
-                        </div>
-
-                        <div>
-                            <h2
-                                style={{
-                                    color: '#FF3693',
-                                    marginLeft: 20,
-                                    fontFamily: 'Montserrat',
-                                }}
-                            >
-                                Output
-                            </h2>
-                            <textarea
-                                style={{
-                                    fontSize: 10,
-                                    flex: '1 1',
-                                    border: 'none',
-                                    background: 'transparent',
-                                    resize: 'none',
-                                }}
-                                value={stdout}
-                            />
-                        </div>
-
-                        <div>
                             <input
                                 type="range"
                                 min={0}
@@ -490,15 +403,160 @@ function Playground(props: PlaygroundProps) {
                             </div>
                         </div>
                     </Splitter>
+                </div>
+            </div>
+
+            {/*<div className="cell" style={{ height: 650 }}>
+                <SwipeableViews
+                    index={codeEditorIdx}
+                    onChangeIndex={(newIndex: number) =>
+                        setCodeEditorIdx(newIndex)
+                    }
+                    style={{ height: '100%' }}
+                >
+                    {props.mode == 'editor' && (
+                        <CodeMirror
+                            className="code-editor"
+                            value={testingCode}
+                            options={{
+                                mode: 'python',
+                                theme: 'default',
+                            }}
+                            onBeforeChange={(editor, data, value) => {
+                                setTestingCode(value)
+                            }}
+                        />
+                    )}
+                    {props.mode == 'editor' && (
+                        <CodeMirror
+                            className="code-editor"
+                            value={testingInput}
+                            options={{
+                                mode: 'text/x-yaml',
+                                theme: 'default',
+                            }}
+                            onBeforeChange={(editor, data, value) => {
+                                setTestingInput(value)
+                            }}
+                        />
+                    )}
+                </SwipeableViews>
+
+                {props.mode == 'editor' && (
                     <Pagination
-                        dots={2}
-                        index={panelIdx}
+                        dots={3}
+                        index={codeEditorIdx}
                         onChangeIndex={(newIndex: number) =>
-                            setPanelIdx(newIndex)
+                            setCodeEditorIdx(newIndex)
                         }
                     />
-                </div>
-                {/* props.mode == 'editor' && (
+                )}
+
+                {error && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: 15,
+                            margin: 'auto',
+                            maxWidth: 350,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            textAlign: 'center',
+                            right: 0,
+                            left: 0,
+                            background: '#FF3693',
+                            color: 'white',
+                            padding: 15,
+                            borderRadius: 25,
+                        }}
+                    >
+                        {error as any}
+                    </div>
+                )}
+            </div>
+
+            <div
+                className="cell"
+                style={{
+                    position: 'relative',
+                    height: 650,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                }}
+            >
+                <Splitter
+                    direction={SplitDirection.Vertical}
+                    gutterClassName="cell-custom-gutter"
+                >
+                    <Splitter
+                        direction={SplitDirection.Horizontal}
+                        gutterClassName="cell-custom-gutter"
+                    >
+                        <div>
+                            <h2
+                                style={{
+                                    color: '#FF3693',
+                                    marginLeft: 20,
+                                    fontFamily: 'Montserrat',
+                                    background: 'white',
+                                }}
+                            >
+                                Input
+                            </h2>
+                            <textarea
+                                style={{
+                                    fontSize: 10,
+                                    flex: '1 1',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    resize: 'none',
+                                    height: '100%',
+                                    width: '100%',
+                                }}
+                                value={stdin}
+                                onChange={(e) => setStdin(e.target.value)}
+                            />
+                        </div>
+
+                        <div
+                            style={{
+                                background: 'white !important',
+                                height: '100%',
+                            }}
+                        >
+                            <h2
+                                style={{
+                                    color: '#FF3693',
+                                    marginLeft: 20,
+                                    fontFamily: 'Montserrat',
+                                }}
+                            >
+                                Output
+                            </h2>
+                            <textarea
+                                style={{
+                                    fontSize: 10,
+                                    flex: '1 1',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    resize: 'none',
+                                    height: '100%',
+                                    width: '100%',
+                                }}
+                                value={stdout}
+                            />
+                        </div>
+                    </Splitter>
+                </Splitter>
+                <Pagination
+                    dots={2}
+                    index={panelIdx}
+                    onChangeIndex={(newIndex: number) => setPanelIdx(newIndex)}
+                />
+                            </div>*/}
+            {/* props.mode == 'editor' && (
                     <div
                         className="cell"
                         style={{
@@ -532,7 +590,6 @@ function Playground(props: PlaygroundProps) {
                     </div>
                 )}
                {/* <textarea id="filename">Hello from a textarea</textarea> */}
-            </Splitter>
 
             {/*<header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
