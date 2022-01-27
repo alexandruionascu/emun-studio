@@ -2,7 +2,7 @@
 /* For components */
 
 .navbar {
-    margin-bottom: 50px;
+    margin-bottom: 40px;
 }
 
 .navbar-item {
@@ -29,17 +29,62 @@
     font-weight: 500;
 }
 
+
+.footer-heading {
+    font-family: Montserrat;
+    font-size: 12px;
+    font-weight: 600;
+    /*text-transform: uppercase;*/
+    letter-spacing: 1px;
+
+
+}
 /* for pages */
 
 .challenge-page {
     padding-left: 50px;
     padding-right: 50px;
-    padding-top: 30px;
+    padding-top: 20px;
 }
 
 .challenge-title {
     font-size: 20px;
     font-family: Montserrat;
-    font-weight: 500;
+    font-weight: 600;
     color: #0A0100;
+}
+
+.challenge-description {
+    color: #0A0100;
+    line-height: 1.5;
+    max-width: 500px;
+    font-family: Montserrat;
+    font-weight: 500;
+    font-size: 12px;
+    margin-bottom: 25px;
+}
+
+.challenge-editor-container {
+
+}
+
+.bordered-container {
+    outline: 4px solid #F1F0F3;
+    outline-offset: -3px;
+    left: 10px;
+    top: 10px;
+    position: relative;
+
+    display: inline-block;
+}
+
+
+.bordered-child {
+    outline: 1px solid #707070;
+    display: inline-block;
+    position: relative;
+    background: white;
+    z-index: 2;
+    top: -10px;
+    left: -10px;
 }

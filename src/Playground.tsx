@@ -1,5 +1,4 @@
 import React from 'react'
-import { Controlled as CodeMirror } from 'react-codemirror2'
 import './Playground.css'
 import {
     EvalResult,
