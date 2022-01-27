@@ -1,21 +1,27 @@
 export type Language = 'Python3' | 'C++' | 'Python2'
 export type Tag = 'dict' | 'basic'
-export interface FlashChallenge {
+
+interface ITestcases {
+    testCases: {
+        [variable: string]: any[]
+    }
+}
+
+export interface FlashChallenge extends ITestcases {
     statement: string;    
     language: Language;
     initialCode: string;
     solutionCode: string;
-    testCases: {
-        [key: string]: any[]
-    },
     tags: Tag[],
     matchVariables: string[]
     time: number
 }
 
+
+
 export const example1: FlashChallenge = {
     statement: 'Creeaza un dictionar countries si inverseaza dictionarul capitals.',
-    initialCode: `capitals = testcase('capitals')`,
+    initialCode: `capitals = __testcase__('capitals')`,
     language: 'Python3',
     testCases: {
         'capitals': [

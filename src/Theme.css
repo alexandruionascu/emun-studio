@@ -1,0 +1,45 @@
+
+/* For components */
+
+.navbar {
+    margin-bottom: 50px;
+}
+
+.navbar-item {
+    font-family: Montserrat;
+    color: #0A0100;
+}
+
+.navbar-list {
+    padding: 0px;
+}
+
+.navbar-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #0A0100;
+    letter-spacing: 2px;
+}
+
+.navbar-item {
+    letter-spacing: 1px;
+    margin-left: 50px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* for pages */
+
+.challenge-page {
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 30px;
+}
+
+.challenge-title {
+    font-size: 20px;
+    font-family: Montserrat;
+    font-weight: 500;
+    color: #0A0100;
+}

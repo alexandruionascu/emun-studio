@@ -4,11 +4,17 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { Link, Route } from "wouter";
 import Playground from './Playground';
+import { ChallengePage } from './pages/ChallengePage';
+import './Theme.css';
 
 ReactDOM.render(
   <React.StrictMode>
       <Route path="/editor">
         {() => <Playground mode="editor" />}
+      </Route>
+
+      <Route path="/challenge">
+        {() => <ChallengePage language="C++" title="Daily Queue" />}
       </Route>
 
       <Route path="/">

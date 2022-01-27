@@ -155,13 +155,6 @@ function Playground(props: PlaygroundProps) {
         variableValues = stepByStep.history[variableValueIdx]
     }
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            setPercent(percent + 0.1)
-        }, 100)
-        return () => clearInterval(interval)
-    }, [percent])
-
     const [panelIdx, setPanelIdx] = React.useState(0)
     const [testIdxToRun, setTestIdxToRun] = React.useState(0)
     const [testResults, setTestResults] = React.useState<{
