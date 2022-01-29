@@ -7,15 +7,15 @@ import Playground from './Playground'
 import { ChallengePage } from './pages/ChallengePage'
 import './Theme.css'
 
-let description =
-    'In this task you need to reverse a disctionary. You have the dictionary capitals, then create one called countries and reverse it. \nGood luck!'
+let description = ''
+    //'In this task you need to reverse a disctionary. You have the dictionary capitals, then create one called countries and reverse it. \nGood luck!'
 
 ReactDOM.render(
     <React.StrictMode>
         <Route path="/editor">{() => <Playground mode="editor" />}</Route>
 
-        <Route path="/challenge">
-            {() => <ChallengePage language="C++" title="Daily Queue" description={description} />}
+        <Route path="/workspace">
+            {() => <ChallengePage language="C++" title="C++ Workspace" description={description} />}
         </Route>
 
         <Route path="/">{() => <Playground mode="workspace" />}</Route>

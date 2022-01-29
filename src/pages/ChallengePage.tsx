@@ -23,13 +23,14 @@ let initialCode = `#include <iostream>
 using namespace std;
 
 int main() {
-  cout << "Hello" << endl;
+  cout << "Hello World!" << endl;
   return 0;
 }`
 
 export const ChallengePage = (props: ChallengePageProps) => {
     const [code, setCode] = useState(initialCode)
     const [sliderIndex, setSliderIndex] = useState(-1)
+    const [isLoading, setIsLoading] = useState(false)
 
     const [res, setRes] = useState<Eval>({
         output: '',
@@ -83,16 +84,25 @@ export const ChallengePage = (props: ChallengePageProps) => {
     }, [sliderIndex])
 
     useEffect(() => {
-        setRes(
-            cppRunner.runner(code, '', () => {}, {
-                maxSteps: 1000,
-                maxTimeout: 100,
-            })
-        )
+        let newRes = cppRunner.runner(code, '', () => {}, {
+            maxSteps: 1000,
+            maxTimeout: 100,
+        })
+
+        if (newRes.error) {
+            newRes.steps = [...res.steps]
+        }
+
+        setRes(newRes)
     }, [code])
 
     useEffect(() => {
         setSliderIndex(res.steps.length - 1)
+        if (!res.error) {
+            setIsLoading(false)
+        } else {
+            setIsLoading(true)
+        }
     }, [res])
 
     const currentStep: Step =
@@ -165,7 +175,7 @@ export const ChallengePage = (props: ChallengePageProps) => {
                 <div className="challenge-variables-container">
                     {currentStep.variables.map((v, i) => (
                         <VariableBox
-                            loading={false}
+                            loading={isLoading}
                             variableName={v.name}
                             key={i}
                             variableValue={v.value}
@@ -174,10 +184,7 @@ export const ChallengePage = (props: ChallengePageProps) => {
                 </div>
             </div>
 
-            <div>{res.output}</div>
-            <div>{JSON.stringify(res)}</div>
-
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 }

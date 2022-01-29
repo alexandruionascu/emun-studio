@@ -82,7 +82,7 @@ class VariableBox extends React.Component<Props, State> {
                                 height: 25,
                                 borderRadius: 7,
                                 padding: 10,
-                                color: '#948E96',
+                                color: '#0A0100',
                                 borderImageSlice: 1,
                                 textAlign: 'center',
                                 boxSizing: 'content-box',
@@ -114,15 +114,14 @@ class VariableBox extends React.Component<Props, State> {
                         fontFamily: 'Montserrat',
                         fontWeight: 300 /* this.props.isCurrentIdentifier ? 'bold' : 'normal' */,
                         textAlign: 'center',
-                        marginTop: 10,
                     }}
                 >
                     <span
                         className="box-label btn p-1 shadow-sm"
                         style={{
-                            color: '#948E96',
-                            fontWeight: 500,
-                            marginTop: 10,
+                            color: '#0A0100',
+                            fontWeight: 400,
+                            marginTop: 5,
                             fontFamily: 'Montserrat',
                             textAlign: 'center',
                         }}

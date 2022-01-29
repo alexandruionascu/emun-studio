@@ -80,13 +80,12 @@ export const cppRunner: IRunner = {
                     .filter(
                         (v: Variable) =>
                             ['cin', 'cout', 'main', 'endl'].indexOf(v.name) ===
-                            -1
+                                -1 && v.value !== undefined
                     )
 
                 if (steps.length > 0 && cppDebugger.prevNode) {
                     steps[steps.length - 1].location = cppDebugger.prevNode
                 }
-
 
                 steps.push(step as Step)
                 done = cppDebugger.continue()
