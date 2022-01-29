@@ -386,7 +386,6 @@ function Playground(props: PlaygroundProps) {
                                 ).map((v, i) => (
                                     <VariableBox
                                         loading={isLoading}
-                                        colorOrder={i}
                                         variableName={v.name}
                                         variableValue={v.value}
                                         key={i}

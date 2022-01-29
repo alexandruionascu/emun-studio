@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Animated } from 'react-animated-css'
 import ClipLoader from 'react-spinners/ClipLoader'
 import { css } from '@emotion/react'
+import { SmallBorderedContainer } from './components/BorderedContainer'
 
 const override = css`
     position: absolute;
@@ -10,7 +11,6 @@ const override = css`
 
 interface Props {
     variableName: string
-    colorOrder: number
     variableValue: number | string | boolean | null | undefined
     indexLabel?: number | string
     isCurrentIdentifier?: boolean
@@ -64,6 +64,7 @@ class VariableBox extends React.Component<Props, State> {
                 animationIn="bounceInRight"
                 animationOut="bounceOutRight"
                 isVisible={this.state.isComponentVisible}
+                style={{margin: 10}}
             >
                 <Animated
                     animationIn="flipInX"
@@ -71,44 +72,42 @@ class VariableBox extends React.Component<Props, State> {
                     animateOnMount={false}
                     isVisible={this.state.isBoxVisible}
                 >
-                    <div
-                        className="variable-box"
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            minWidth: 25,
-                            height: 25,
-                            borderRadius: 7,
-                            padding: 10,
-                            color: '#948E96',
-                            borderImageSlice: 1,
-                            textAlign: 'center',
-                            boxSizing: 'content-box',
-                            filter: this.props.loading ? 'blur(1px)' : 'unset',
-                            position: 'relative',
-                            fontWeight: 500,
-                            fontFamily: 'Montserrat',
-                            lineHeight: 1.5,
-                            overflowY: 'auto',
-                            boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
-                            background:
-                                VariableBox.backgrounds[
-                                    this.props.colorOrder %
-                                        VariableBox.backgrounds.length
-                                ],
-                        }}
-                    >
-                        {this.props.loading && (
-                            <ClipLoader
-                                color={'#948E96'}
-                                loading={true}
-                                css={override}
-                                size={30}
-                            />
-                        )}
-                        {`${this.props.variableValue}`}
-                    </div>
+                    <SmallBorderedContainer>
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minWidth: 25,
+                                height: 25,
+                                borderRadius: 7,
+                                padding: 10,
+                                color: '#948E96',
+                                borderImageSlice: 1,
+                                textAlign: 'center',
+                                boxSizing: 'content-box',
+                                filter: this.props.loading
+                                    ? 'blur(1px)'
+                                    : 'unset',
+                                position: 'relative',
+                                fontWeight: 500,
+                                fontFamily: 'Montserrat',
+                                lineHeight: 1.5,
+                                overflowY: 'auto',
+                                boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px',
+                            }}
+                        >
+                            {this.props.loading && (
+                                <ClipLoader
+                                    color={'#948E96'}
+                                    loading={true}
+                                    css={override}
+                                    size={30}
+                                />
+                            )}
+                            {`${this.props.variableValue}`}
+                        </div>
+                    </SmallBorderedContainer>
                 </Animated>
                 <div
                     style={{

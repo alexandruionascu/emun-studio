@@ -1293,6 +1293,15 @@
     "@codemirror/state" "^0.19.2"
     "@codemirror/view" "^0.19.0"
 
+"@codemirror/lang-cpp@^0.19.1":
+  "integrity" "sha512-BGvZkfcqcalAwxocuE9DhH6gqflm5IjL/8mGTzc8bHzeP1N4innK8qo2G69ohEML4LDZv4WyXc3y4C9/zsGCGQ=="
+  "resolved" "https://registry.npmjs.org/@codemirror/lang-cpp/-/lang-cpp-0.19.1.tgz"
+  "version" "0.19.1"
+  dependencies:
+    "@codemirror/highlight" "^0.19.0"
+    "@codemirror/language" "^0.19.0"
+    "@lezer/cpp" "^0.15.0"
+
 "@codemirror/lang-python@^0.19.4":
   "integrity" "sha512-eSH1JXbf0D30y+f3nWy/+bTLAIV8RmcQbbVD8DsBxkxOHMVKcILgxFRHCovba8YEMtmq45I1DoWcNt1CeKnrYQ=="
   "resolved" "https://registry.npmjs.org/@codemirror/lang-python/-/lang-python-0.19.4.tgz"
@@ -1731,6 +1740,13 @@
   "integrity" "sha512-vv0nSdIaVCRcJ8rPuDdsrNVfBOYe/4Szr/LhF929XyDmBndLDuWiCCHooGlGlJfzELyO608AyDhVsuX/ZG36NA=="
   "resolved" "https://registry.npmjs.org/@lezer/common/-/common-0.15.11.tgz"
   "version" "0.15.11"
+
+"@lezer/cpp@^0.15.0":
+  "integrity" "sha512-4Ve5LIRCE+VF+XE/cfSSOg6VuTOfh1pU2oxLKJu3XbyYzmSp9IjSZcW/UNcSRtMxM05MQ4/3AR5tUwp9PL4ExA=="
+  "resolved" "https://registry.npmjs.org/@lezer/cpp/-/cpp-0.15.2.tgz"
+  "version" "0.15.2"
+  dependencies:
+    "@lezer/lr" "^0.15.0"
 
 "@lezer/lr@^0.15.0":
   "integrity" "sha512-rmUukgyKSm6xzXO4cK5hkpX3+ZTHF+bHDkEuhofAVUTS3J23YytUxGWsrDwBVvGbhvxW87kheb2mRYHRwKacDQ=="
@@ -7280,6 +7296,15 @@
   "resolved" "https://registry.npmjs.org/jsbn/-/jsbn-0.1.1.tgz"
   "version" "0.1.1"
 
+"JSCPP@^2.0.9":
+  "integrity" "sha512-ix62BbyR33JfuLS5JN3lrP5WrDFHJMe498TbyEN0vjRgK1pvOREs03YA0rMoj0U2h9EYLSoo9emZMW2rSlFVfQ=="
+  "resolved" "https://registry.npmjs.org/JSCPP/-/JSCPP-2.0.9.tgz"
+  "version" "2.0.9"
+  dependencies:
+    "lodash" "^4.17.20"
+    "pegjs-util" "^1.4.21"
+    "printf" "^0.6.0"
+
 "jsdom@^16.4.0":
   "integrity" "sha512-lYMm3wYdgPhrl7pDcRmvzPhhrGVBeVhPIqeHjzeiHN3DFmD1RBpbExbi8vU7BJdH8VAZYovR8DMt0PNNDM7k8w=="
   "resolved" "https://registry.npmjs.org/jsdom/-/jsdom-16.4.0.tgz"
@@ -8660,6 +8685,18 @@
     "safe-buffer" "^5.0.1"
     "sha.js" "^2.4.8"
 
+"pegjs-util@^1.4.21":
+  "integrity" "sha512-0z15BXCjxwgeD+pO5QImUgOFsJ86jFt6oDqatveLggeARSS5wmrt9SxCONkUvOeSsob2faVBC9H4wpl4zudg9A=="
+  "resolved" "https://registry.npmjs.org/pegjs-util/-/pegjs-util-1.4.21.tgz"
+  "version" "1.4.21"
+  dependencies:
+    "pegjs" ">=0.10.0"
+
+"pegjs@>=0.10.0":
+  "integrity" "sha1-z4uvrm7d/0tafvsYUmnqr0YQ3b0="
+  "resolved" "https://registry.npmjs.org/pegjs/-/pegjs-0.10.0.tgz"
+  "version" "0.10.0"
+
 "performance-now@^2.1.0":
   "integrity" "sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns="
   "resolved" "https://registry.npmjs.org/performance-now/-/performance-now-2.1.0.tgz"
@@ -9479,6 +9516,11 @@
     "ansi-regex" "^5.0.0"
     "ansi-styles" "^4.0.0"
     "react-is" "^17.0.1"
+
+"printf@^0.6.0":
+  "integrity" "sha512-is0ctgGdPJ5951KulgfzvHGwJtZ5ck8l042vRkV6jrkpBzTmb/lueTqguWHy2JfVA+RY6gFVlaZgUS0j7S/dsw=="
+  "resolved" "https://registry.npmjs.org/printf/-/printf-0.6.1.tgz"
+  "version" "0.6.1"
 
 "process-nextick-args@~2.0.0":
   "integrity" "sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag=="

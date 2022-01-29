@@ -64,8 +64,13 @@
     margin-bottom: 25px;
 }
 
-.challenge-editor-container {
-
+.challenge-variables-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 200px;
+    flex-basis: 0;
+    flex-grow: 1; 
 }
 
 .bordered-container {
@@ -74,8 +79,9 @@
     left: 10px;
     top: 10px;
     position: relative;
-
+    background: white;
     display: inline-block;
+    margin-bottom: 10px;
 }
 
 
@@ -87,4 +93,57 @@
     z-index: 2;
     top: -10px;
     left: -10px;
+}
+
+
+.bordered-container-small {
+    outline: 1px solid #707070;
+    outline-offset: 0px;
+    left: 2px;
+    top: 2px;
+    position: relative;
+    background: white;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+
+.bordered-child-small {
+    outline: 1px solid #707070;
+    display: inline-block;
+    position: relative;
+    background: white;
+    z-index: 2;
+    top: -2px;
+    left: -2px;
+}
+
+
+.challenge-editor-slider {
+    height: 1px;
+    margin-left: 15%;
+    width: 70%;
+    appearance: none;
+    background: #707070;
+    outline: none;
+}
+
+
+
+.challenge-editor-output{
+    height: 60px;
+    margin-top: 15px;
+    margin-left: 30px;
+    font-size: 12px;
+    font-family: Montserrat;
+    font-weight: 500;
+    letter-spacing: 1;
+    color: #0A0100;
+    white-space: pre-line;
+    overflow: auto;
+}
+
+.challenge-editor-slider::-webkit-slider-thumb {
+    border: 1px solid #707070;
+    border-radius: 50%;
 }
